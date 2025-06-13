@@ -1,5 +1,5 @@
 import streamlit as st
-from utilitaire import comeback_to_previous_page
+
 st.header("Tutoriel d'utililisation")
 
 with st.expander("Récupérer les articles de recherche dans Web Of Science :", expanded=False):
@@ -13,6 +13,8 @@ with st.expander("Récupérer les articles de recherche dans Web Of Science :", 
     st.subheader("Dans le cas où le chercheur à plus de 1000 articles de recherches dans Web Of Science")
     st.write("Sachez que l’outil d’export ne peut exporter que 999 articles à la fois.")
     st.write("Veuillez ne pas entrer '1000 to 2000' mais '1001 to 2000'.")
+    # st.write("Dans le cas où vous avez plusieurs fichiers à télécharger, il faut les fusionner en un seul fichier.")
+    st.write("Etape 5 - Une fois le fichier téléchargé, il faut le faire changer l'extension de xls à xlsx.")
 
 with st.expander("Récupérer l'identifiant Scopus :", expanded=False):
     st.write("Etape 1 - Aller sur le profile Scopus du chercheur.")
@@ -23,5 +25,3 @@ with st.expander("Récupérer l'URL orcID du chercheur :", expanded=False):
     st.write("Etape 1 - Aller sur le profile orcID du chercheur.")
     st.write("Etape 2 - Copier-Coller l'URL indiquer en-dessous du nom du chercheur. (Regarder l'image ci-dessous.)")
     st.image(r"img\Orcid.png", width=1000)
-
-comeback_to_previous_page()

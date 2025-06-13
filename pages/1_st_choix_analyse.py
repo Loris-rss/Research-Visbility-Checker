@@ -2,8 +2,6 @@ import streamlit as st
 import pathlib
 from utilitaire import reset_session, reach_st_donnee, reach_st_tutoriel
 
-st.divider()
-
 st.title("Choix de l'analyse")
 
 comparison_mode = st.radio(

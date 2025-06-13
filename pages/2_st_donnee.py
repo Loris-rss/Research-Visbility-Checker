@@ -5,44 +5,18 @@ import pathlib
 
 from os import path
 from fonction import get_hal_researcher_data, Orcid_Researcher, Scopus_Researcher
-from utilitaire import reset_session, reach_st_donnee, reach_st_show_donnee
+from utilitaire import reset_session, reach_st_donnee, reach_st_show_donnee, read_markdown_file
 
 st.title("Récupération des données")
 
-with st.expander("Guide d'utilisation", expanded=False):
-    st.markdown("""
-    ### 📝 Comment remplir cette page ?
-
-    Vous avez deux options pour charger vos données :
-
-    #### Option 1 : Utiliser les exemples
-    - Cochez simplement la case "Utiliser les exemples fournis"
-    - Les données de démonstration seront automatiquement chargées
-
-    #### Option 2 : Entrer vos propres données
-    1. **Informations personnelles** :
-        - Saisissez votre prénom et nom
-        - Ces informations permettent de chercher les publications dans HAL
-
-    2. **Identifiants de recherche** :
-        - **ORCID** : Collez l'URL complète de votre profil ORCID
-        - **Scopus ID** : Entrez votre identifiant Scopus
-
-    3. **Données Web of Science** :
-        - Téléversez vos fichiers d'export Web of Science (formats acceptés : Excel, CSV)
-        - Veuillez vous référer à la page "Tutoriel d'utilisation" pour savoir comment récupérer ces fichiers.
-
-    4. **Lancement de la recherche** :
-        - Cliquez sur le bouton "Lancer la recherche", un indicateur de progression vous informera de l'avancement.
-
-    #### 🔍 Visualisation des résultats
-    - Utilisez le bouton "Montrer les données" pour voir vos publications
-    - Le bouton "Reset" permet de recommencer à zéro si nécessaire
-    """)
+with st.expander("Guide d'utilisation pour la récupération des données.", expanded=False):
+    st.markdown(read_markdown_file(r"md\guide_utilisation_donnees.md"), unsafe_allow_html=True)
 
 # Téléversement des fichiers
 st.header("1. Rentrer les informations suivantes")
 databases = {}
+
+check_list = []
 
 # Option pour charger des exemples
 use_examples = st.checkbox("Utiliser les exemples fournis", value=False,)
@@ -68,57 +42,113 @@ if use_examples:
         st.error(f"Erreur lors du chargement des exemples: {str(e)}")
 
 else:
-    # Interface pour entrer les informations du chercheur et charger les bases de données.
-    last_name_col, first_name_col = st.columns(2)
+    if "show_hal_fields" not in st.session_state:
+        st.session_state.show_hal_fields = False
+        st.session_state["primary_button"] = "primary"
+    if "show_scopus_fields" not in st.session_state:
+        st.session_state.show_scopus_fields = False
+    if "show_orcid_fields" not in st.session_state:
+        st.session_state.show_orcid_fields = False
+    if "show_wos_fields" not in st.session_state:
+        st.session_state.show_wos_fields = False
 
-    with first_name_col:
-        researcher_first_name = st.text_input("Prénom du chercheur :")
-    with last_name_col:
-        researcher_last_name = st.text_input("Nom du chercheur :")
+    # Créer une ligne de boutons côte à côte
+    col1, col2, col3, col4 = st.columns(4)
 
-    orcid_col, scopus_col = st.columns(2)
+    with col1:
+        if st.button(
+            "HAL", 
+            type="primary" if not st.session_state.show_hal_fields else "secondary",
+            help="Récupérer les données HAL"
+        ):
+            st.session_state.show_hal_fields = not st.session_state.show_hal_fields
+
+    with col2:
+        if st.button(
+            "ORCID", 
+            type="primary" if not st.session_state.show_orcid_fields else "secondary",
+            help="Récupérer les données ORCID"
+        ):
+            st.session_state.show_orcid_fields = not st.session_state.show_orcid_fields
+
+    with col3:
+        if st.button(
+            "Scopus", 
+            type="primary" if not st.session_state.show_scopus_fields else "secondary",
+            help="Récupérer les données Scopus"
+            ):
+            st.session_state.show_scopus_fields = not st.session_state.show_scopus_fields
+
+    with col4:
+        if st.button(
+            "WoS", 
+            type="primary" if not st.session_state.show_wos_fields else "secondary",
+            help="Récupérer les données WoS"
+        ):
+            st.session_state.show_wos_fields = not st.session_state.show_wos_fields
+
+    # Afficher les champs HAL si nécessaire
+    if st.session_state.show_hal_fields:
+        st.session_state.primary_button = "secondary"
+        last_name_col, first_name_col = st.columns(2)
+        with first_name_col:
+            researcher_first_name = st.text_input("Prénom du chercheur :")
+        with last_name_col:
+            researcher_last_name = st.text_input("Nom du chercheur :")
+        check_list.append((researcher_first_name,researcher_last_name))
+
+    # Afficher les champs ORCID si nécessaire
+    if st.session_state.show_orcid_fields:
+        orcid_researcher = st.text_input("Veuillez saisir l'URL vers le profil ORCID du chercheur :", 
+                                    help="Veuillez saisir le lien URL complet.")
+        check_list.append(orcid_researcher)
+
+    # Afficher les champs Scopus si nécessaire
+    if st.session_state.show_scopus_fields:
+        scopus_id = st.text_input("Entrer le Socpus ID du chercheur :", 
+                                help="Exemple : '01234567891'.")
+        check_list.append(scopus_id)
     
-    with orcid_col:
-        orcid_researcher = st.text_input("Veuillez saisir l'URL vers le profil ORCID du chercheur :", help="Veuillez saisir le lien URL complet.")
+    if st.session_state.show_wos_fields:
+        # Téléversement des fichiers Web Of Science
+        uploaded_files = st.file_uploader(
+            "Téléverser les fichiers Web Of Science", 
+            accept_multiple_files=True,
+            type=["xlsx", "xls", "csv"]
+        )
+        check_list.append(uploaded_files)
+        if uploaded_files:
+            for file in uploaded_files:
+                # Déterminer le nom de la base de données à partir du nom du fichier
+                db_name = file.name.split(".")[0].capitalize()
+                
+                st.markdown(f"#### Fichier: {file.name}")
 
-
-    with scopus_col:
-        scopus_id = st.text_input("Entrer le Socpus ID du chercheur :", help="Exemple : '01234567891'.")
-
-    # Téléversement des fichiers Web Of Science.
-    uploaded_files = st.file_uploader(
-        "Téléverser les fichiers Web Of Science", 
-        accept_multiple_files=True,
-        type=["xlsx", "xls", "csv"]
-    )
-
-    if uploaded_files:
-        for file in uploaded_files:
-            # Déterminer le nom de la base de données à partir du nom du fichier
-            db_name = file.name.split(".")[0].capitalize()
-            
-            st.markdown(f"#### Fichier: {file.name}")
-
-            # Lecture du fichier selon son type
-            if file.name.endswith('.csv'):
-                df = pd.read_csv(file)
-            else:
-                df = pd.read_excel(file)
-            
-            # Ajouter à la liste des bases de données
-            databases["WoS"] = df
-
+                # Lecture du fichier selon son type
+                if file.name.endswith('.csv'):
+                    df = pd.read_csv(file)
+                else:
+                    df = pd.read_excel(file)
+                
+                # Ajouter à la liste des bases de données
+                databases["WoS"] = df
+    st.write(check_list)
+    st.write(len(check_list))
     empty = st.empty()
 
     if empty.button("Lancer la récupération de données", type='primary'):
-        if not scopus_id or not researcher_last_name or not researcher_first_name or not orcid_researcher:
+        if len(check_list) < 2:
             pass
         
         else:
             with st.spinner(""):
                 bar_perc = 0
                 progress_bar = empty.progress(bar_perc, text="Recherche des données orcid en cours...")
-                orcid_df = Orcid_Researcher(orcid_link=orcid_researcher).format_df_orcids()
+                if orcid_researcher:
+                    orcid_df = Orcid_Researcher(orcid_link=orcid_researcher).format_df_orcids()
+                else:
+                    st.write("pas de données orcid")
+                    pass
                 
                 bar_perc += 1
                 progress_bar.progress(bar_perc / 3, text="Recherche des données HAL en cours...") 
@@ -126,6 +156,7 @@ else:
                 
                 bar_perc += 1
                 progress_bar.progress(bar_perc/ 3, text="Recherche des données Scopus en cours...") 
+                
                 if len(scopus_id) >= 10:
                     scopus_df = Scopus_Researcher(scopus_id=scopus_id).get_publication_scopus()
                 else:
@@ -150,3 +181,4 @@ with comparaison:
     reach_st_show_donnee(message = "Montrer les données", type_button = 'primary')
 with reset:
     reset_session()
+st.write(st.session_state)

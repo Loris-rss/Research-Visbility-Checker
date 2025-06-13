@@ -1,29 +1,28 @@
 import streamlit as st
 import pandas as pd
 
-from utilitaire import reset_session, reach_st_comparaison, reach_st_donnee
+from utilitaire import reset_session, reach_st_comparaison, reach_st_donnee, read_markdown_file
 
 st.title("3. Vérifier les données")
 
-with st.expander("Guide de la page", expanded=False):
-    st.markdown("""
-    ### 📊 Visualisation des données récupérées
-
-    Sur cette page, vous pouvez :
-    - Consulter les publications trouvées dans chaque base de données (onglets en haut)
-    - Voir le nombre total de publications par base
-    - Explorer la distribution temporelle de vos publications (menu déroulant sous chaque tableau)
-    
-    #### Navigation
-    - "Reset" : Recommencer depuis le début
-    - "Revenir à l'importation" : Modifier les données sources
-    - "Continuer" : Passer à l'analyse comparative
-    """)
+with st.expander("Guide de la page pour la visualisation des données.", expanded=False):
+    st.markdown(read_markdown_file(r"md\Visualisation des données.md"), unsafe_allow_html=True)
 
 st.write("Voici les données trouvées pour le chercheur :")
 
+st.write(st.session_state)
+
+
 tabs = st.tabs(list(st.session_state["databases"].keys()))
     
+reset, back, forward = st.columns(3)
+with reset:
+    reset_session()
+with back:
+    reach_st_donnee(message = "Revenir à l'importation des données", type_button = 'secondary')
+with forward:
+    reach_st_comparaison()
+
 # Pour chaque onglet, afficher le DataFrame correspondant
 for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
     with tab:
@@ -56,10 +55,3 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
 
 st.divider()
 
-reset, back, forward = st.columns(3)
-with reset:
-    reset_session()
-with back:
-    reach_st_donnee(message = "Revenir à l'importation des données", type_button = 'secondary')
-with forward:
-    reach_st_comparaison()
