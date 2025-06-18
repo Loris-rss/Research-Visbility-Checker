@@ -414,23 +414,23 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
         
         # ---- 7. Affichage des tableaux ---- 
         st.subheader("Détail des résultats")
-        tabs = st.tabs([f"Communs ({found_in_target})", f"Non trouvés ({total_source - found_in_target})", "Tous les articles"])
+        tabs = st.tabs(["Tous les articles", f"Communs ({found_in_target})", f"Non trouvés ({total_source - found_in_target})"])
         
         with tabs[0]:
+            display_cols = [col for col in source.columns if col not in ["all_ids", status_col, in_target_col, matching_id_col, "Unnamed: 0"]]
+            st.dataframe(source[display_cols], height=400)
+        
+        with tabs[1]:
             common_pubs = source[source[in_target_col]].reset_index(drop=True)
             if len(common_pubs) > 0:
                 display_cols = [col for col in common_pubs.columns if col not in ["all_ids", status_col, in_target_col, matching_id_col, "Unnamed: 0"]]
                 st.dataframe(common_pubs[display_cols], height=400)
         
-        with tabs[1]:
+        with tabs[2]:
             missing_pubs = source[~source[in_target_col]].reset_index(drop=True)
             if len(missing_pubs) > 0:
                 display_cols = [col for col in missing_pubs.columns if col not in ["all_ids", status_col, in_target_col, matching_id_col, "Unnamed: 0"]]
                 st.dataframe(missing_pubs[display_cols], height=400)
-        
-        with tabs[2]:
-            display_cols = [col for col in source.columns if col not in ["all_ids", status_col, in_target_col, matching_id_col, "Unnamed: 0"]]
-            st.dataframe(source[display_cols], height=400)
         
         if save_file:
             source.to_excel(f"{source_name}_{target_name}.xlsx")

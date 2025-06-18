@@ -180,7 +180,6 @@ else:
             pass
         empty.empty()
 
-
 st.divider()
 
 reset, comparaison = st.columns(2)
@@ -188,4 +187,3 @@ with comparaison:
     reach_st_show_donnee(message = "Montrer les données", type_button = 'primary')
 with reset:
     reset_session()
-st.write(st.session_state)
