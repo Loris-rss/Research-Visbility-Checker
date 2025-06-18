@@ -58,10 +58,11 @@ else:
     with col1:
         if st.button(
             "HAL", 
-            type="primary" if not st.session_state.show_hal_fields else "secondary",
+            type="primary" if st.session_state.show_hal_fields == False else "secondary",
             help="Récupérer les données HAL"
         ):
             st.session_state.show_hal_fields = not st.session_state.show_hal_fields
+            st.rerun()
 
     with col2:
         if st.button(
@@ -70,6 +71,8 @@ else:
             help="Récupérer les données ORCID"
         ):
             st.session_state.show_orcid_fields = not st.session_state.show_orcid_fields
+            st.rerun()
+
 
     with col3:
         if st.button(
@@ -78,6 +81,8 @@ else:
             help="Récupérer les données Scopus"
             ):
             st.session_state.show_scopus_fields = not st.session_state.show_scopus_fields
+            st.rerun()
+
 
     with col4:
         if st.button(
@@ -86,6 +91,8 @@ else:
             help="Récupérer les données WoS"
         ):
             st.session_state.show_wos_fields = not st.session_state.show_wos_fields
+            st.rerun()
+
 
     # Afficher les champs HAL si nécessaire
     if st.session_state.show_hal_fields:
@@ -132,8 +139,8 @@ else:
                 
                 # Ajouter à la liste des bases de données
                 databases["WoS"] = df
-    st.write(check_list)
-    st.write(len(check_list))
+    # st.write(check_list)
+    # st.write(len(check_list))
     empty = st.empty()
 
     if empty.button("Lancer la récupération de données", type='primary'):
