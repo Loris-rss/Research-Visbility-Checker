@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import streamlit as st
 
-def base_link(prefix: str = None, query:str = None):
+def base_link(prefix: str = None, query:str = None) -> dict:
     """
     Cette fonction permet de rechercher des informations de base telles que l'auteur, une recherche simple, etc.
     
@@ -18,7 +18,7 @@ def base_link(prefix: str = None, query:str = None):
     endpoint = f"?q={query}&wt=json"
     return requests.get(root+endpoint).json()
 
-def id_author(lastName:str, firstName:str):
+def id_author(lastName:str, firstName:str) -> list:
     """
     Cette fonction permet de rechercher les identifiants des auteurs que vous souhaitez.
     
@@ -46,13 +46,16 @@ def id_author(lastName:str, firstName:str):
             id_auth.append(docid) # .split("-")[1]
     return id_auth
 
-def get_hal_researcher_data(lastName:str,firstName:str):
+def get_hal_researcher_data(lastName:str,firstName:str) -> pd.DataFrame:
     """
     Cette fonction permet de rechercher les identifiants des auteurs que vous souhaitez.
     
     Args :
         lastName(str) : Nom de l'auteur
         firstName(str) : prénom de l'auteur
+    
+    Return:
+        pd.DataFrame : DataFrame avec les données de l'auteur
     """
 
     # authIdForm_i:158428 -> Marc Humbert -> 449

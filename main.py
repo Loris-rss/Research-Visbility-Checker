@@ -6,7 +6,8 @@ from utilitaire import read_markdown_file
 st.set_page_config("Research Visibility Checker", layout="wide")
 
 st.markdown("""
-# Bienvenue sur Research Visibility Checker !""")
+# Bienvenue sur Research Visibility Checker !"""
+)
 
 with st.expander("Présentation de l'application", expanded=False):
     st.markdown(read_markdown_file(r"md\presentation_app.md"), unsafe_allow_html=True)
