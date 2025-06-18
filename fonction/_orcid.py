@@ -7,9 +7,21 @@ class Orcid_Researcher:
         self.df_orcid:pd.DataFrame = self.extract_ids_from_orcids()
         
     def req_orcid(self) -> dict:
+        """
+        Récupère les données de l'ORCID.
+        
+        Returns :
+            dict : données de l'ORCID
+        """
         return requests.get(self.orcid_link,headers={'Accept':'application/json'}).json()
 
     def extract_ids_from_orcids(self) -> pd.DataFrame:
+        """
+        Extrait les identifiants de l'ORCID.
+        
+        Returns :
+            pd.DataFrame : DataFrame avec les identifiants de l'ORCID
+        """
         response_json = self.req_orcid()
         doi_orcid_list = []
         id_type_list = []
@@ -50,7 +62,7 @@ class Orcid_Researcher:
             "year": year_list
         }).sort_values("type").reset_index(drop=True)
 
-    def check_id_missing(self) -> tuple[list,list]:
+    def check_id_missing(self) -> tuple[list, list]:
         """
         Vérifie la présence des identifiants dans un DataFrame.
         
@@ -77,14 +89,15 @@ class Orcid_Researcher:
                 
         return ids_presents, ids_manquants
 
-    def to_rename_and_drop(self) -> tuple[dict,list]:
+    def to_rename_and_drop(self) -> tuple[dict, list]:
         """
-        Rename and drop the columns of the dataframe
+        Renomme et supprime les colonnes du DataFrame.
         
         Args:
             self -> Donner le dataframe avec les informations des articles scientifiques du chercheur souhaité.
             
-        Ouput -> Tuple with the rename_dict and the to_drop list.
+        Return:
+            tuple[dict, list] : Tuple avec le dictionnaire de renommage et la liste des colonnes à supprimer.
         """
         ids_present, ids_missing = self.check_id_missing()
         rename_dict = {}
@@ -111,12 +124,11 @@ class Orcid_Researcher:
         """ 
         Création des colonnes en fonction du type d'ID (ex: Orcid, Pubmed Id,WoS etc) et remplir ces colonnes avec les bons IDs
         
-        !!! Changement possible à faire, checker si "other-id" et "pmc" sont toujours négligeable à chaque fois. !!!
+        Args:
+            self -> Donner le dataframe avec les informations des articles scientifiques du chercheur souhaité.
         
-        Args :
-            orcid_df:DataFrame -> Donner le dataframe avec les informations des articles scientifiques du chercheur souhaité.
-        
-        Ouput -> DataFrame avec les colonnes "DOI", Pubmed Id et UT (Unique WOS ID).
+        Return:
+            pd.DataFrame : DataFrame avec les colonnes "DOI", Pubmed Id et UT (Unique WOS ID).
         """
         rename_dict, to_drop = self.to_rename_and_drop()
 

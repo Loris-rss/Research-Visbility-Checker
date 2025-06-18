@@ -3,6 +3,9 @@ import streamlit as st
 from pathlib import Path
 
 def reset_session(message = "Annuler et reprendre au départ"):
+    """
+    Bouton pour annuler et reprendre au départ.
+    """
     if st.button(message,type='secondary'):
         for key in st.session_state.keys():
             del st.session_state[key]
@@ -10,6 +13,9 @@ def reset_session(message = "Annuler et reprendre au départ"):
         st.rerun()
 
 def reach_st_donnee(message = "Importer vos données", type_button = 'primary'):
+    """
+    Bouton pour atteindre la page de sélection des données.
+    """
     if st.button(message, type=type_button):
         if "navigation" in st.session_state:
             st.session_state["previous_page"] = st.session_state["navigation"]
@@ -17,6 +23,9 @@ def reach_st_donnee(message = "Importer vos données", type_button = 'primary'):
         st.rerun()
 
 def reach_st_show_donnee(message = "Montrer les données", type_button = 'primary'):
+    """
+    Bouton pour atteindre la page de visualisation des données.
+    """
     if st.button(message, type=type_button):
         if "navigation" in st.session_state:
             st.session_state["previous_page"] = st.session_state["navigation"]
@@ -24,6 +33,9 @@ def reach_st_show_donnee(message = "Montrer les données", type_button = 'primar
         st.rerun()
 
 def reach_st_comparaison(message = "Lancer la comparaison", type_button = 'primary'):
+    """
+    Bouton pour atteindre la page de comparaison des données.
+    """
     if st.button(message, type=type_button):
         if "navigation" in st.session_state:
             st.session_state["previous_page"] = st.session_state["navigation"]
@@ -31,6 +43,9 @@ def reach_st_comparaison(message = "Lancer la comparaison", type_button = 'prima
         st.rerun()
 
 def reach_st_tutoriel(message = "Accéder au tutoriel", type_button = 'primary'):
+    """
+    Bouton pour atteindre la page de tutoriel.
+    """
     if st.button(message, type=type_button):
         if "navigation" in st.session_state:
             st.session_state["previous_page"] = st.session_state["navigation"]
@@ -46,4 +61,7 @@ def reach_st_tutoriel(message = "Accéder au tutoriel", type_button = 'primary')
 #             st.rerun()
 
 def read_markdown_file(markdown_file):
+    """
+    Permet la lecture d'un fichier markdown.
+    """
     return Path(markdown_file).read_text(encoding="utf-8")

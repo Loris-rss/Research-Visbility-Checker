@@ -4,11 +4,12 @@ import pandas as pd
 import streamlit as st
 
 def base_link(prefix: str = None, query:str = None):
-    """" This founction performs searches basics such as author, simple search
+    """
+    Cette fonction permet de rechercher des informations de base telles que l'auteur, une recherche simple, etc.
     
     Args : 
-        prefix(str) : domain name
-        query(str) : search information, parameter can be used. 
+        prefix(str) : nom du domaine
+        query(str) : information à rechercher, paramètre pouvant être utilisé. 
     """
     # A documenter !!!!!!
     root = f"https://api.archives-ouvertes.fr/{"ref/" + prefix 
@@ -18,7 +19,9 @@ def base_link(prefix: str = None, query:str = None):
     return requests.get(root+endpoint).json()
 
 def id_author(lastName:str, firstName:str):
-    """ This founction will search for the IDs of the authors you want.
+    """
+    Cette fonction permet de rechercher les identifiants des auteurs que vous souhaitez.
+    
     Args :
         lastName(str) : Nom de l'auteur
         firstName(str) : prénom de l'auteur
@@ -44,7 +47,9 @@ def id_author(lastName:str, firstName:str):
     return id_auth
 
 def get_hal_researcher_data(lastName:str,firstName:str):
-    """ This founction will search for the IDs of the authors you want.
+    """
+    Cette fonction permet de rechercher les identifiants des auteurs que vous souhaitez.
+    
     Args :
         lastName(str) : Nom de l'auteur
         firstName(str) : prénom de l'auteur

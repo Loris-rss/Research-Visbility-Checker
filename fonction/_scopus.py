@@ -10,7 +10,16 @@ scopus_api_key = os.getenv("SCOPUS_API_KEY")
 scopus_insttoken = os.getenv("SCOPUS_INSTTOKEN")
 
 class Scopus_Researcher:
+    """
+    Cette classe permet de récupérer les données depuis l'API Scopus.
+    """
     def __init__(self, scopus_id):
+        """
+        Initialise la classe Scopus_Researcher.
+        
+        Args:
+            scopus_id(str) : identifiant Scopus
+        """
         self.scopus_id = str(scopus_id)
         self.api_key = scopus_api_key  # Définir avant l'appel à get_scopus_data
         self.insttoken = scopus_insttoken
@@ -19,6 +28,9 @@ class Scopus_Researcher:
     def get_scopus_data(self) -> list:
         """
         Récupère les données depuis l'API Scopus.
+        
+        Return:
+            list : liste des données récupérées
         """
         found_items_num: int = 1
         start_item: int = 0
@@ -64,6 +76,9 @@ class Scopus_Researcher:
     def get_publication_scopus(self) -> pd.DataFrame:
         """
         Transforme les données récupérées depuis l'API Scopus en DataFrame.
+        
+        Return:
+            pd.DataFrame : DataFrame avec les données récupérées
         """
         scopus_articles = self.df_scopus
         data_list = []

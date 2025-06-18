@@ -4,7 +4,18 @@ import matplotlib.pyplot as plt
 import time
 
 class TxRecoupement:
+    """
+    Cette classe permet de calculer le taux de recoupement entre deux DataFrames.
+    """
     def __init__(self, source_df: pd.DataFrame = None, target_df:pd.DataFrame = None, provenance:str = None):
+        """
+        Initialise la classe TxRecoupement.
+        
+        Args:
+            source_df(pd.DataFrame) : DataFrame source
+            target_df(pd.DataFrame) : DataFrame cible
+            provenance(str) : provenance des données
+        """
         self.source_df = source_df
         self.target_df = target_df
         self.provenance = provenance
@@ -14,6 +25,9 @@ class TxRecoupement:
     def get_col_name(self) -> tuple:
         """
         Identifie les colonnes pertinentes dans le DataFrame.
+        
+        Return:
+            tuple : tuple avec les noms des colonnes DOI, Pubmed et Wos
         """
         doi_col = None
         pubmed_col = None
@@ -43,6 +57,12 @@ class TxRecoupement:
         return doi_col, pubmed_col, wos_col
 
     def get_tx_recoup(self) -> pd.DataFrame:
+        """
+        Calcule le taux de recoupement entre deux DataFrames.
+        
+        Return:
+            pd.DataFrame : DataFrame avec les taux de recoupement
+        """
         doi, pubmed, wos = self.col_name_tuple
         
         # Vérification des colonnes requises
@@ -145,8 +165,16 @@ class TxRecoupement:
             else:
                 st.write(df_common_orcid)
 
-def normalize_doi(doi_str):
-    """Normalise le DOI pour améliorer la correspondance."""
+def normalize_doi(doi_str)  -> str:
+    """
+    Normalise le DOI pour améliorer la correspondance.
+    
+    Args:
+        doi_str(str) : DOI à normaliser.
+        
+    Return:
+        str : DOI normalisé.
+    """
     if not isinstance(doi_str, str):
         return doi_str
     
@@ -155,8 +183,16 @@ def normalize_doi(doi_str):
     doi_str = doi_str.strip()
     return doi_str
 
-def create_id_column(df):
-    """Crée une colonne all_ids contenant tous les identifiants disponibles"""
+def create_id_column(df) -> pd.DataFrame:
+    """
+    Crée une colonne all_ids contenant tous les identifiants disponibles.
+    
+    Args:
+        df(pd.DataFrame) : DataFrame à modifier.
+    
+    Return:
+        pd.DataFrame : DataFrame modifié.
+    """
     # Vérifier si l'objet est un DataFrame
     if not isinstance(df, pd.DataFrame):
         
@@ -197,10 +233,16 @@ def create_id_column(df):
     df['all_ids'] = df.apply(combine_ids, axis=1)
     return df
 
-def suggest_column_mapping(df):
+def suggest_column_mapping(df) -> dict:
     """
-    Suggère un mapping automatique des colonnes importantes (DOI, Pubmed, etc.)
-    à partir des noms de colonnes existants.
+    Pas utilisé
+    Suggère un mapping automatique des colonnes importantes (DOI, Pubmed, etc.) à partir des noms de colonnes existants.
+    
+    Args:
+        df(pd.DataFrame) : DataFrame à modifier.
+        
+    Return:
+        dict : mapping des colonnes.
     """
     mapping = {
         "doi": None,
@@ -236,9 +278,19 @@ def suggest_column_mapping(df):
     
     return mapping
 
-def compare_publication_databases(source_df, target_df, source_name="Source", target_name="Target", save_file=True):
+def compare_publication_databases(source_df, target_df, source_name="Source", target_name="Target", save_file=True) -> pd.DataFrame:
     """
     Compare deux bases de données de publications scientifiques et identifie les recoupements.
+    
+    Args:
+        source_df(pd.DataFrame) : DataFrame source
+        target_df(pd.DataFrame) : DataFrame cible
+        source_name(str) : nom de la source
+        target_name(str) : nom de la cible
+        save_file(bool) : enregistrer les résultats
+    
+    Return:
+        pd.DataFrame : DataFrame avec les résultats
     """
     message = st.empty()
     with st.spinner(f"Comparaison entre {source_name} et {target_name} en cours..."):
@@ -385,9 +437,16 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
 
         return source
 
-def compare_all_databases(databases, save_results=True):
+def compare_all_databases(databases, save_results=True) -> dict:
     """
     Compare toutes les combinaisons possibles de bases de données fournies.
+    
+    Args:
+        databases(dict) : dictionnaire avec les bases de données
+        save_results(bool) : enregistrer les résultats
+    
+    Return:
+        dict : dictionnaire avec les résultats
     """
     if len(databases) < 2:
         st.warning("Veuillez téléverser au moins deux bases de données pour effectuer une comparaison.")
