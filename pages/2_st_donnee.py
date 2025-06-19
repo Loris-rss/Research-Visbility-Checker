@@ -73,7 +73,6 @@ else:
             st.session_state.show_orcid_fields = not st.session_state.show_orcid_fields
             st.rerun()
 
-
     with col3:
         if st.button(
             "Scopus", 
@@ -83,7 +82,6 @@ else:
             st.session_state.show_scopus_fields = not st.session_state.show_scopus_fields
             st.rerun()
 
-
     with col4:
         if st.button(
             "WoS", 
@@ -92,7 +90,6 @@ else:
         ):
             st.session_state.show_wos_fields = not st.session_state.show_wos_fields
             st.rerun()
-
 
     # Afficher les champs HAL si nécessaire
     if st.session_state.show_hal_fields:
@@ -138,9 +135,8 @@ else:
                     df = pd.read_excel(file)
                 
                 # Ajouter à la liste des bases de données
-                databases["WoS"] = df
-    # st.write(check_list)
-    # st.write(len(check_list))
+                databases[db_name] = df
+    st.write(len(databases))
     empty = st.empty()
 
     if empty.button("Lancer la récupération de données", type='primary'):
@@ -161,13 +157,18 @@ else:
                 progress_bar.progress(bar_perc / 3, text="Recherche des données HAL en cours...") 
                 hal_df = get_hal_researcher_data(researcher_last_name, researcher_first_name)
                 
+
                 bar_perc += 1
                 progress_bar.progress(bar_perc/ 3, text="Recherche des données Scopus en cours...") 
                 
-                if len(scopus_id) >= 10:
-                    scopus_df = Scopus_Researcher(scopus_id=scopus_id).get_publication_scopus()
+                if st.session_state["show_scopus_fields"]:
+                    if len(scopus_id) >= 10:
+                        scopus_df = Scopus_Researcher(scopus_id=scopus_id).get_publication_scopus()
+                    else:
+                        st.error("Le Scopus ID doit contenir au moins 10 chiffres.")
                 else:
-                    st.error("Le Scopus ID doit contenir au moins 10 chiffres.")
+                    # st.write("pas de données scopus")
+                    pass
                 bar_perc += 1
                 progress_bar.progress(bar_perc / 3,text="Recherche des données en cours...") 
         try:
@@ -175,12 +176,15 @@ else:
             databases["Scopus"] = scopus_df
             databases["Orcid"] = orcid_df
             st.success("Données chargées avec succès.")
-            st.session_state["databases"] = databases
         except NameError as e:
             pass
         empty.empty()
 
+st.session_state["databases"] = databases
+
 st.divider()
+st.write(len(databases))
+st.write(st.session_state["databases"])
 
 reset, comparaison = st.columns(2)
 with comparaison:

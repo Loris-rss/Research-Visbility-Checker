@@ -90,5 +90,19 @@ class Scopus_Researcher:
                 "scopus_id": articles["dc:identifier"],
                 "doi": articles.get("prism:doi", "")
             })
+        df = pd.DataFrame(data=data_list)
+        def extract_last_or_full(x:str) -> str:
+                """
+                Extrait le dernier mot ou la première phrase si le dernier mot n'est pas un nombre.
+                
+                Args:
+                    x (str): La chaîne de caractères à traiter.
+                    
+                Returns:
+                    str: Le dernier mot ou la première phrase si le dernier mot n'est pas un nombre.
+                """
+                words = x.split(" ")
+                return words[-1] if words[-1].isdigit() else x.split(" ")[0]
+        df["Date"] = df["Date"].apply(extract_last_or_full)
 
-        return pd.DataFrame(data=data_list)
+        return df

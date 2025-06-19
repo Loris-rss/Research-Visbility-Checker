@@ -69,7 +69,7 @@ def get_hal_researcher_data(lastName:str,firstName:str) -> pd.DataFrame:
                 title_s = doc["title_s"][0]
                 journalTitle_s = doc.get("journalTitle_s", None)
                 journalPublisher_s = doc.get("journalPublisher_s", None)
-                publicationDate_s = doc["publicationDate_s"]
+                publicationDate_s = doc["publicationDate_s"].split("-")[0]
                 doiId_s = doc.get("doiId_s", None)
                 pubmedId_id = doc.get("pubmedId_id", None)
                 authLastNameFirstName_s = doc.get("authLastNameFirstName_s", None)

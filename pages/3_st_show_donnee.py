@@ -14,6 +14,8 @@ with st.expander("Guide de la page pour la visualisation des données.", expande
 
 st.write("Voici les données trouvées pour le chercheur :")
 
+st.write(st.session_state["databases"])
+
 tabs = st.tabs(list(st.session_state["databases"].keys()))
     
 reset, back, forward = st.columns(3)
@@ -33,30 +35,9 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
         st.write(f"{len(df)} articles de recherche trouvés.")
         # Va falloir rajouter d'autres statistiques
         st.dataframe(df)
-        st.write(df.columns)
-        date_list_col = ["year", "Date", "publicationDate_s", "Publication Year"]
+        date_list_col = ["Year","year", "Date", "publicationDate_s", "Publication Year"]
 
         right_col = "".join([col for col in df.columns if col in date_list_col])
-        
-        if right_col == "publicationDate_s":
-            df[right_col] = df[right_col].apply(lambda x: x.split("-")[0])
-        
-        if right_col == "Date":
-            
-            def extract_last_or_full(x:str) -> str:
-                """
-                Extrait le dernier mot ou la première phrase si le dernier mot n'est pas un nombre.
-                
-                Args:
-                    x (str): La chaîne de caractères à traiter.
-                    
-                Returns:
-                    str: Le dernier mot ou la première phrase si le dernier mot n'est pas un nombre.
-                """
-                words = x.split(" ")
-                return words[-1] if words[-1].isdigit() else x.split(" ")[0]
-
-            df[right_col] = df[right_col].apply(extract_last_or_full)
         
         csv, xlsx = st.columns(2)
         with csv:
@@ -73,10 +54,8 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
             st.markdown("""
             Cette section présente la répartition des publications scientifiques par année. Cela permet de visualiser l'évolution du volume de publications au fil du temps pour le chercheur sélectionné.
             """)
-            # st.write("Publication Year", df["Publication Year"])
-            # st.write(df[right_col])
-            # publications_par_annee = df[right_col].value_counts().sort_index()
-            # st.bar_chart(publications_par_annee)
+            publications_par_annee = df[right_col].value_counts().sort_index()
+            st.bar_chart(publications_par_annee)
 
 st.divider()
 
