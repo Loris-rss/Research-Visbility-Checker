@@ -45,7 +45,8 @@ else:
             st.error("Veuillez téléverser au moins deux bases de données pour effectuer une comparaison.")
             reach_st_donnee(message = "Revenir à l'importation des données", type_button = 'secondary')
         else:
-            compare_all_databases(st.session_state["databases"], save_results=save_option)
+            st.session_state["compare_all_databases"] = compare_all_databases(st.session_state["databases"], save_results=save_option)
+
 st.divider()
 reset, deux = st.columns(2)
 
