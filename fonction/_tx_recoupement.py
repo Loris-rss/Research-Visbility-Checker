@@ -414,11 +414,32 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
                 else:
                     st.session_state["plot_pie_chart"][f"plot_{source_name}_{target_name}"] = fig
                 st.pyplot(fig)
+                formats = ["png", "jpeg", "svg", "pdf"]
+                # Ajoute un key unique basé sur source_name et target_name
+                selectbox_key = f"selectbox_{source_name}_{target_name}_{fig_id}"
+                selected_format = st.selectbox(
+                    "Choisissez le format de téléchargement :",
+                    formats,
+                    index=0,
+                    key=selectbox_key
+                )
+
+                img_buffer = io.BytesIO()
+                fig.savefig(img_buffer, format=selected_format, bbox_inches='tight')
+                img_buffer.seek(0)
+                # Ajoute aussi un key unique au bouton si besoin
+                download_key = f"download_{source_name}_{target_name}_{fig_id}"
+                st.download_button(
+                    label=f"📥 Télécharger le graphique ({selected_format.upper()})",
+                    data=img_buffer,
+                    file_name=f"plot_{source_name}_{target_name}.{selected_format}",
+                    mime=f"image/{'svg+xml' if selected_format == 'svg' else selected_format}",
+                    key=download_key
+                )
 
             fig, ax = plt.subplots(figsize=(6, 6))
             status_counts = source[status_col].value_counts()
-    
-            create_pie_chart(source_name, target_name, status_counts, ax)
+            create_pie_chart(source_name, target_name, status_counts, ax, fig_id="main")
         
         # ---- 7. Affichage des tableaux ---- 
         st.subheader("Détail des résultats")
