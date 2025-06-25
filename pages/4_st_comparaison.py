@@ -50,6 +50,30 @@ else:
             reach_st_donnee(message = "Revenir à l'importation des données", type_button = 'secondary')
         else:
             compare_all_databases(st.session_state["databases"], save_results=save_option)
+             # Retrieve the matplotlib figure
+            selecton_plot = st.selectbox("Choisissez la base de données", options=st.session_state["plot_pie_chart"].keys())
+
+            formats = ["png", "jpeg", "svg", "pdf"]
+
+            selected_format = st.selectbox(
+                "Choisissez le format de téléchargement :",
+                formats,
+                index=0,
+            )
+
+            fig = st.session_state["plot_pie_chart"][selecton_plot]
+
+            # Convert the figure to PNG in-memory
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png')
+            buf.seek(0)
+
+            st.download_button(
+                label="Télécharger le graphique",
+                data=buf,
+                file_name=f"{selecton_plot}.{selected_format}",
+                mime=f"image/{selected_format}"
+            )
 st.divider()
 reset, deux = st.columns(2)
 
