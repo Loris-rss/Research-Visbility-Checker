@@ -14,21 +14,6 @@ with st.expander("Présentation de l'application", expanded=False):
     st.markdown(read_markdown_file(r"md\presentation_app.md"), unsafe_allow_html=True)
 
 st.divider()
-# Retrieve the matplotlib figure
-fig = st.session_state["plot_pie_chart"]["plot_Marc humbert wos_Scopus"]
-
-# Convert the figure to PNG in-memory
-buf = io.BytesIO()
-fig.savefig(buf, format='png')
-buf.seek(0)
-st.divider()
-
-st.download_button(
-    label="Télécharger le graphique",
-    data=buf,
-    file_name="plot_Marc humbert wos_Scopus.png",
-    mime="image/png"
-)
 
 def main():
     if "navigation" not in st.session_state:
