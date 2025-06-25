@@ -1,7 +1,6 @@
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
-import time
 import io
 
 
@@ -304,6 +303,7 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
                 st.warning(f"La base de données source {source_name} n'est pas un DataFrame valide.")
                 return pd.DataFrame()
         
+        # Vérifier si ça fait pas la même chose.
         if not isinstance(target_df, pd.DataFrame):
             if isinstance(target_df, list) and target_df and isinstance(target_df[0], dict):
                 target_df = pd.DataFrame(target_df)
@@ -371,10 +371,11 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
         source[status_col] = source[in_target_col].apply(
             lambda x: f"Dans {target_name}" if x else f"Pas dans {target_name}"
         )
-        
-        # ---- 6. Affichage des résultats ----  
         message.success("Comparaison terminée avec succès!")
         message.empty()
+        
+        # ---- 6. Affichage des résultats ----  
+        
         st.subheader("Résultats")
         
         col1, col2 = st.columns(2)
@@ -386,7 +387,7 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
         with col2:
             st.metric("Taux de recoupement", f"{percentage:.2f}%")
 
-            def create_pie_chart(source_name, target_name, values, ax, fig_id=""):
+            def create_pie_chart(source_name, target_name, values, ax):
                 # Configuration des styles pour chaque catégorie
                 resultat = values[f"Pas dans {target_name}"] > values[f"Dans {target_name}"]
                 
@@ -408,33 +409,16 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
                     explode=[0.05, 0],
                     autopct="%1.1f%%")
                 ax.set_title(f'Proportion des articles {source_name} présents dans {target_name}')
+                if "plot_pie_chart" not in st.session_state.keys():
+                    st.session_state["plot_pie_chart"] = {f"plot_{source_name}_{target_name}": fig}
+                else:
+                    st.session_state["plot_pie_chart"][f"plot_{source_name}_{target_name}"] = fig
                 st.pyplot(fig)
-                formats = ["png", "jpeg", "svg", "pdf"]
-                # Ajoute un key unique basé sur source_name et target_name
-                selectbox_key = f"selectbox_{source_name}_{target_name}_{fig_id}"
-                selected_format = st.selectbox(
-                    "Choisissez le format de téléchargement :",
-                    formats,
-                    index=0,
-                    key=selectbox_key
-                )
-
-                img_buffer = io.BytesIO()
-                fig.savefig(img_buffer, format=selected_format, bbox_inches='tight')
-                img_buffer.seek(0)
-                # Ajoute aussi un key unique au bouton si besoin
-                download_key = f"download_{source_name}_{target_name}_{fig_id}"
-                st.download_button(
-                    label=f"📥 Télécharger le graphique ({selected_format.upper()})",
-                    data=img_buffer,
-                    file_name=f"plot_{source_name}_{target_name}.{selected_format}",
-                    mime=f"image/{'svg+xml' if selected_format == 'svg' else selected_format}",
-                    key=download_key
-                )
 
             fig, ax = plt.subplots(figsize=(6, 6))
             status_counts = source[status_col].value_counts()
-            create_pie_chart(source_name, target_name, status_counts, ax, fig_id="main")
+    
+            create_pie_chart(source_name, target_name, status_counts, ax)
         
         # ---- 7. Affichage des tableaux ---- 
         st.subheader("Détail des résultats")
@@ -462,6 +446,7 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
         return source
 
 def compare_all_databases(databases, save_results=True) -> dict:
+
     """
     Compare toutes les combinaisons possibles de bases de données fournies.
     

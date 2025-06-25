@@ -1,4 +1,6 @@
 import streamlit as st
+import io 
+
 from fonction import compare_all_databases, suggest_column_mapping, compare_publication_databases
 from fonction import TxRecoupement, CheckResearcherInPaper
 
@@ -12,6 +14,8 @@ st.markdown("""
 ### Explication
 Cette comparaison vous permet de visualiser et d'explorer les données collectées pour le chercheur sélectionné. Vous pouvez consulter les articles trouvés dans chaque base de données, examiner les statistiques principales et analyser la distribution temporelle des publications.
 """)
+
+st.divider()
 
 if st.session_state["comparison_mode"] == "Comparer deux bases de données":
     col1, col2 = st.columns(2)
@@ -46,8 +50,34 @@ else:
             reach_st_donnee(message = "Revenir à l'importation des données", type_button = 'secondary')
         else:
             compare_all_databases(st.session_state["databases"], save_results=save_option)
+            # Retrieve the matplotlib figure
+            selecton_plot = st.selectbox("Choisissez la base de données", options=st.session_state["plot_pie_chart"].keys())
+
+            formats = ["png", "jpeg", "svg", "pdf"]
+
+            selected_format = st.selectbox(
+                "Choisissez le format de téléchargement :",
+                formats,
+                index=0,
+            )
+
+            fig = st.session_state["plot_pie_chart"][selecton_plot]
+
+            # Convert the figure to PNG in-memory
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png')
+            buf.seek(0)
+
+            st.download_button(
+                label="Télécharger le graphique",
+                data=buf,
+                file_name=f"{selecton_plot}.{selected_format}",
+                mime=f"image/{selected_format}"
+            )
+
 st.divider()
 reset, deux = st.columns(2)
 
 with reset:
     reset_session()
+

@@ -34,7 +34,7 @@ if use_examples:
         databases["Scopus"] = scopus_df
         databases["Orcid"] = orcid_df
         databases["WoS"] = wos_df
-  
+
         st.success(f"Exemples chargés avec succès: HAL ({len(hal_df)} publications), Scopus ({len(scopus_df)} publications), Orcid ({len(orcid_df)} publications)")
         st.session_state["databases"] = databases
 
@@ -44,7 +44,7 @@ if use_examples:
 else:
     if "show_hal_fields" not in st.session_state:
         st.session_state.show_hal_fields = False
-        st.session_state["primary_button"] = "primary"
+        # st.session_state["primary_button"] = "primary"
     if "show_scopus_fields" not in st.session_state:
         st.session_state.show_scopus_fields = False
     if "show_orcid_fields" not in st.session_state:
@@ -135,8 +135,8 @@ else:
                     df = pd.read_excel(file)
                 
                 # Ajouter à la liste des bases de données
-                databases[db_name] = df
-    st.write(len(databases))
+                if db_name not in list(databases.keys()):
+                    databases[db_name] = df
     empty = st.empty()
 
     if empty.button("Lancer la récupération de données", type='primary'):
@@ -157,7 +157,6 @@ else:
                 progress_bar.progress(bar_perc / 3, text="Recherche des données HAL en cours...") 
                 hal_df = get_hal_researcher_data(researcher_last_name, researcher_first_name)
                 
-
                 bar_perc += 1
                 progress_bar.progress(bar_perc/ 3, text="Recherche des données Scopus en cours...") 
                 
@@ -171,20 +170,18 @@ else:
                     pass
                 bar_perc += 1
                 progress_bar.progress(bar_perc / 3,text="Recherche des données en cours...") 
-        try:
+            # try:
             databases["HAL"] = hal_df
-            databases["Scopus"] = scopus_df
+            databases["Scopus"] = scopus_df if "Scopus" not in list(databases.keys()) else databases["Scopus"]
             databases["Orcid"] = orcid_df
             st.success("Données chargées avec succès.")
-        except NameError as e:
-            pass
+            # except NameError as e:
+            #     st.write(e)
         empty.empty()
 
-st.session_state["databases"] = databases
+        st.session_state["databases"] = databases
 
 st.divider()
-st.write(len(databases))
-st.write(st.session_state["databases"])
 
 reset, comparaison = st.columns(2)
 with comparaison:

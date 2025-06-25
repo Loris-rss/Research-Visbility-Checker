@@ -14,17 +14,7 @@ with st.expander("Guide de la page pour la visualisation des données.", expande
 
 st.write("Voici les données trouvées pour le chercheur :")
 
-st.write(st.session_state["databases"])
-
 tabs = st.tabs(list(st.session_state["databases"].keys()))
-    
-reset, back, forward = st.columns(3)
-with reset:
-    reset_session()
-with back:
-    reach_st_donnee(message = "Revenir à l'importation des données", type_button = 'secondary')
-with forward:
-    reach_st_comparaison()
 
 # Pour chaque onglet, afficher le DataFrame correspondant
 for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
@@ -59,3 +49,10 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
 
 st.divider()
 
+reset, back, forward = st.columns(3)
+with reset:
+    reset_session()
+with back:
+    reach_st_donnee(message = "Revenir à l'importation des données", type_button = 'secondary')
+with forward:
+    reach_st_comparaison()
