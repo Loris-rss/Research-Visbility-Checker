@@ -1,10 +1,9 @@
 import streamlit as st
-import io 
 
 from fonction import compare_all_databases, suggest_column_mapping, compare_publication_databases
 from fonction import TxRecoupement, CheckResearcherInPaper
 
-from utilitaire import reset_session, reach_st_donnee
+from utilitaire import reset_session, reach_st_donnee, download_plot
 
 # Si au moins deux bases de données sont chargées
 
@@ -16,22 +15,29 @@ Cette comparaison vous permet de visualiser et d'explorer les données collecté
 """)
 
 st.divider()
+st.markdown("## Comparaison de vos bases de données.")
 
 if st.session_state["comparison_mode"] == "Comparer deux bases de données":
+    # ---- 1. Sélection des bases de données ---- 
     col1, col2 = st.columns(2)
     
+    # ---- 2. Sélection de la base de données source ---- 
     with col1:
         source_name = st.selectbox("Base de données source", options=list(st.session_state["databases"].keys()))
     
+    # ---- 3. Sélection de la base de données cible ---- 
     with col2:
         target_name = st.selectbox(
             "Base de données cible", 
             options=[db for db in st.session_state["databases"].keys() if db != source_name]
         )
     
+    # ---- 4. Sauvegarder les résultats ---- 
     save_option = st.checkbox("Sauvegarder les résultats", value=True)
     
+    # ---- 5. Lancer la comparaison ---- 
     if st.button("Comparer les bases de données"):
+        # ---- 6. Afficher les résultats ---- 
         st.markdown("## Résultats de la comparaison")
         # Effectuer la comparaison
         compare_publication_databases(
@@ -41,6 +47,16 @@ if st.session_state["comparison_mode"] == "Comparer deux bases de données":
             target_name=target_name,
             save_file=save_option
         )
+    
+    st.divider()
+    
+    # ---- 7. Télécharger le graphique ---- 
+    st.markdown("## Télécharger le graphique")
+    if "plot_pie_chart" in st.session_state.keys():
+        download_plot()
+    else:
+        pass
+
 else:
     save_option = st.checkbox("Sauvegarder les résultats", value=False)
     
@@ -50,30 +66,14 @@ else:
             reach_st_donnee(message = "Revenir à l'importation des données", type_button = 'secondary')
         else:
             compare_all_databases(st.session_state["databases"], save_results=save_option)
-             # Retrieve the matplotlib figure
-            selecton_plot = st.selectbox("Choisissez la base de données", options=st.session_state["plot_pie_chart"].keys())
+    
+    if "plot_pie_chart" in st.session_state.keys():
+        st.divider()
+        st.markdown("## Télécharger le graphique")
+        download_plot()
+    else:
+        pass
 
-            formats = ["png", "jpeg", "svg", "pdf"]
-
-            selected_format = st.selectbox(
-                "Choisissez le format de téléchargement :",
-                formats,
-                index=0,
-            )
-
-            fig = st.session_state["plot_pie_chart"][selecton_plot]
-
-            # Convert the figure to PNG in-memory
-            buf = io.BytesIO()
-            fig.savefig(buf, format='png')
-            buf.seek(0)
-
-            st.download_button(
-                label="Télécharger le graphique",
-                data=buf,
-                file_name=f"{selecton_plot}.{selected_format}",
-                mime=f"image/{selected_format}"
-            )
 st.divider()
 reset, deux = st.columns(2)
 
