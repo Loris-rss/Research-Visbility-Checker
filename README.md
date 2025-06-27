@@ -133,6 +133,10 @@ Research-Visbility-Checker-V2/
 - **Requests** : Appels API vers les bases de données
 - **OpenPyXL** : Lecture/écriture de fichiers Excel
 - **Matplotlib** : Graphiques supplémentaires
+- **OS** : Gestion des variables d'environnement et des chemins
+- **re** : Expressions régulières pour le traitement des chaînes
+- **IO** : Gestion des flux d'entrée/sortie
+- **Pathlib** : Manipulation des chemins de fichiers
 
 ## 📊 Fonctionnalités avancées
 

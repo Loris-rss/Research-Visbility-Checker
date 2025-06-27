@@ -1,6 +1,5 @@
 import streamlit as st
 from os import path
-import io
 
 from utilitaire import read_markdown_file
 
