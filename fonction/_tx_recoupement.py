@@ -409,6 +409,7 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
                     explode=[0.05, 0],
                     autopct="%1.1f%%")
                 ax.set_title(f'Proportion des articles {source_name} présents dans {target_name}')
+                
                 if "plot_pie_chart" not in st.session_state.keys():
                     st.session_state["plot_pie_chart"] = {f"plot_{source_name}_{target_name}": fig}
                 else:
@@ -417,30 +418,7 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
 
             fig, ax = plt.subplots(figsize=(6, 6))
             status_counts = source[status_col].value_counts()
-    
             create_pie_chart(source_name, target_name, status_counts, ax)
-
-            st.write(st.session_state)
-            formats = ["png", "jpeg", "svg", "pdf"]
-            
-            selected_format = st.selectbox(
-                "Choisissez le format de téléchargement :",
-                formats,
-                index=0,
-                key=f"selectbox_{source_name}_{target_name}"
-            )
-
-            img_buffer = io.BytesIO()
-            fig.savefig(img_buffer, format=selected_format, bbox_inches='tight')
-            img_buffer.seek(0)
-            st.write(st.session_state["plot_pie_chart"])
-            st.download_button(
-                label=f"📥 Télécharger le graphique ({selected_format.upper()})",
-                data=img_buffer,
-                file_name=f"plot_{source_name}_{target_name}.{selected_format}",
-                mime=f"image/{'svg+xml' if selected_format == 'svg' else selected_format}",
-                key=f"download_{source_name}_{target_name}"
-            )
         
         # ---- 7. Affichage des tableaux ---- 
         st.subheader("Détail des résultats")

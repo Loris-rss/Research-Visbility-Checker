@@ -39,8 +39,11 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
                 df.to_excel(f"{db_name}.xlsx", index=False)
                 st.success("Les données ont été téléchargées avec succès.")
 
+        st.divider()
+
+        st.markdown("## Distribution temporelle des publications")
         # Distribution des publications par année
-        with st.expander("Distribution temporelle des publications", expanded=True):
+        with st.expander("Distribution temporelle des publications", expanded=False):
             st.markdown("""
             Cette section présente la répartition des publications scientifiques par année. Cela permet de visualiser l'évolution du volume de publications au fil du temps pour le chercheur sélectionné.
             """)

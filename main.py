@@ -1,5 +1,6 @@
 import streamlit as st
 from os import path
+import io
 
 from utilitaire import read_markdown_file
 
@@ -13,6 +14,7 @@ with st.expander("Présentation de l'application", expanded=False):
     st.markdown(read_markdown_file(r"md\presentation_app.md"), unsafe_allow_html=True)
 
 st.divider()
+
 
 def main():
     if "navigation" not in st.session_state:
