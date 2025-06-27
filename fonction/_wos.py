@@ -5,7 +5,15 @@ import streamlit as st
 
 class CheckResearcherInPaper():
     """
-    Cette classe permet de vérifier si un auteur est présent dans un article.
+    Cette classe permet de vérifier la présence d'un auteur dans les publications Web of Science.
+    
+    Elle fournit des méthodes pour :
+    - Vérifier si un auteur est présent dans la liste des auteurs d'une publication
+    - Identifier les anomalies potentielles dans les noms d'auteurs
+    - Détecter les variations possibles du nom de l'auteur recherché
+    
+    La vérification se fait de manière insensible à la casse pour éviter les faux négatifs
+    dus aux différences de capitalisation.
     """
     def __init__(self,dataframe,name_of_auth:str):
         """

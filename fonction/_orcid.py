@@ -2,6 +2,13 @@ import requests
 import pandas as pd
 
 class Orcid_Researcher:
+    """
+    Cette classe permet de récupérer les données depuis l'ORCID.
+    
+    Elle fournit des méthodes pour :
+    - Récupérer les données depuis l'ORCID
+    - Transformer les données récupérées en DataFrame
+    """
     def __init__(self,orcid_link:str):
         self.orcid_link = orcid_link
         self.df_orcid:pd.DataFrame = self.extract_ids_from_orcids()

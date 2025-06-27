@@ -12,6 +12,13 @@ scopus_insttoken = os.getenv("SCOPUS_INSTTOKEN")
 class Scopus_Researcher:
     """
     Cette classe permet de récupérer les données depuis l'API Scopus.
+    
+    Elle fournit des méthodes pour :
+    - Récupérer les données depuis l'API Scopus
+    - Transformer les données récupérées en DataFrame
+    - Extraire la date de publication à partir du nom de la publication
+    
+    Les données sont récupérées via l'API Scopus en utilisant l'identifiant Scopus.
     """
     def __init__(self, scopus_id):
         """
