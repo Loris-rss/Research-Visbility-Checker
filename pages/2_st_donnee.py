@@ -1,7 +1,8 @@
 import pandas as pd
-
 import streamlit as st
-import pathlib
+
+import os
+
 
 from os import path
 from fonction import get_hal_researcher_data, Orcid_Researcher, Scopus_Researcher
@@ -73,18 +74,21 @@ else:
             st.session_state.show_orcid_fields = not st.session_state.show_orcid_fields
             st.rerun()
 
-    with col3:
-        if st.button(
-            "Scopus", 
-            type="primary" if not st.session_state.show_scopus_fields else "secondary",
-            help="Récupérer les données Scopus"
-            ):
-            st.session_state.show_scopus_fields = not st.session_state.show_scopus_fields
-            st.rerun()
+    if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY":
+        with col3:
+            if st.button(
+                "Scopus", 
+                type="primary" if not st.session_state.show_scopus_fields else "secondary",
+                help="Récupérer les données Scopus"
+                ):
+                st.session_state.show_scopus_fields = not st.session_state.show_scopus_fields
+                st.rerun()
+    else:
+        st.warning("Vous n'avez pas de clé API Scopus. Veuillez la renseigner dans le fichier .env ou téléverser les données Scopus.")
 
     with col4:
         if st.button(
-            "WoS", 
+            f"Web Of Science{"/Scopus" if os.getenv('SCOPUS_API_KEY') != 'YOUR_SCOPUS_API_KEY' else ''}", 
             type="primary" if not st.session_state.show_wos_fields else "secondary",
             help="Récupérer les données WoS"
         ):

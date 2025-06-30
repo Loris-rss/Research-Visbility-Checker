@@ -117,6 +117,11 @@ def download_plot():
     Return:
         None : Affiche les widgets de sélection et le bouton de téléchargement
     """
+    
+    def on_download_click():
+        """Fonction callback vide pour éviter le refresh de la page"""
+        pass
+    
     selecton_plot = st.selectbox("Choisissez la base de données", options=st.session_state["plot_pie_chart"].keys())
 
     formats = ["png", "jpeg", "svg", "pdf"]
@@ -138,5 +143,43 @@ def download_plot():
         label="Télécharger le graphique",
         data=buf,
         file_name=f"{selecton_plot}.{selected_format}",
-        mime=f"image/{selected_format}"
+        mime=f"image/{selected_format}",
+        on_click=on_download_click
     )
+
+def download_all_plots():
+    """
+    Télécharge tous les graphiques matplotlib disponibles depuis l'interface Streamlit.
+
+    Return:
+        None : Affiche le bouton de téléchargement pour tous les graphiques
+    """
+    
+    if "plot_pie_chart" not in st.session_state or not st.session_state["plot_pie_chart"]:
+        st.warning("Aucun graphique disponible pour le téléchargement.")
+        return
+    
+    import zipfile
+    
+    def create_zip_of_all_plots():
+        """Crée un fichier zip contenant tous les graphiques"""
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for plot_name, fig in st.session_state["plot_pie_chart"].items():
+                img_buffer = io.BytesIO()
+                fig.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
+                img_buffer.seek(0)
+                zip_file.writestr(f"{plot_name}.png", img_buffer.getvalue())
+        
+        zip_buffer.seek(0)
+        return zip_buffer
+    
+    if st.button("Télécharger tous les graphiques (ZIP)", type="primary"):
+        zip_data = create_zip_of_all_plots()
+        st.download_button(
+            label="📁 Télécharger le fichier ZIP",
+            data=zip_data,
+            file_name="tous_les_graphiques.zip",
+            mime="application/zip"
+        )

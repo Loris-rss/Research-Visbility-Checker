@@ -17,7 +17,7 @@ st.divider()
 
 def main():
     if "navigation" not in st.session_state:
-        st.navigation([st.Page(path.relpath("pages/1_st_choix_analyse.py"),title='Research Visibility Checker'), st.Page(path.relpath("pages/0_tutorial.py"),title='Tutoriel')]).run()
+        st.navigation([st.Page(path.relpath("pages/2_st_donnee.py"),title='Research Visibility Checker'), st.Page(path.relpath("pages/0_tutorial.py"),title='Tutoriel')]).run()
     else: 
         st.navigation([st.Page(path.relpath(f"pages/{st.session_state["navigation"]}"), title="Research Visibility Checker"), st.Page(path.relpath("pages/0_tutorial.py"),title='Tutoriel')]).run()
 

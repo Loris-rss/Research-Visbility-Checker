@@ -4,7 +4,16 @@ import matplotlib.pyplot as plt
 
 class TxRecoupement:
     """
-    Cette classe permet de calculer le taux de recoupement entre deux DataFrames.
+    Cette classe permet de calculer et analyser le taux de recoupement entre deux jeux de données bibliographiques.
+    
+    Elle fournit des méthodes pour :
+    - Identifier les publications communes entre deux sources de données
+    - Calculer le pourcentage de recoupement entre les bases
+    - Détecter les publications uniques à chaque source
+    - Analyser les incohérences potentielles dans les métadonnées
+    
+    Les comparaisons se font principalement via les identifiants DOI, PubMed et WoS
+    pour assurer une correspondance fiable entre les publications.
     """
     def __init__(self, source_df: pd.DataFrame = None, target_df:pd.DataFrame = None, provenance:str = None):
         """
@@ -277,7 +286,7 @@ def suggest_column_mapping(df) -> dict:
     
     return mapping
 
-def compare_publication_databases(source_df, target_df, source_name="Source", target_name="Target", save_file=True) -> pd.DataFrame:
+def compare_publication_databases(source_df, target_df, source_name="Source", target_name="Target") -> pd.DataFrame:
     """
     Compare deux bases de données de publications scientifiques et identifie les recoupements.
     
@@ -286,7 +295,6 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
         target_df(pd.DataFrame) : DataFrame cible
         source_name(str) : nom de la source
         target_name(str) : nom de la cible
-        save_file(bool) : enregistrer les résultats
     
     Return:
         pd.DataFrame : DataFrame avec les résultats
@@ -409,12 +417,12 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
                 ax.set_title(f'Proportion des articles {source_name} présents dans {target_name}')
                 
                 if "plot_pie_chart" not in st.session_state.keys():
-                    st.session_state["plot_pie_chart"] = {f"plot_{source_name}_{target_name}": fig}
+                    st.session_state["plot_pie_chart"] = {f"{source_name}-{target_name}": fig}
                 else:
-                    st.session_state["plot_pie_chart"][f"plot_{source_name}_{target_name}"] = fig
+                    st.session_state["plot_pie_chart"][f"{source_name}-{target_name}"] = fig
                 st.pyplot(fig)
 
-            fig, ax = plt.subplots(figsize=(6, 6))
+            fig, ax = plt.subplots(figsize=(4, 4))
             status_counts = source[status_col].value_counts()
             create_pie_chart(source_name, target_name, status_counts, ax)
         
@@ -437,20 +445,16 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
             if len(missing_pubs) > 0:
                 display_cols = [col for col in missing_pubs.columns if col not in ["all_ids", status_col, in_target_col, matching_id_col, "Unnamed: 0"]]
                 st.dataframe(missing_pubs[display_cols], height=400)
-        
-        if save_file:
-            source.to_excel(f"{source_name}_{target_name}.xlsx")
 
         return source
 
-def compare_all_databases(databases, save_results=True) -> dict:
+def compare_all_databases(databases) -> dict:
 
     """
     Compare toutes les combinaisons possibles de bases de données fournies.
     
     Args:
         databases(dict) : dictionnaire avec les bases de données
-        save_results(bool) : enregistrer les résultats
     
     Return:
         dict : dictionnaire avec les résultats
@@ -500,7 +504,6 @@ def compare_all_databases(databases, save_results=True) -> dict:
                                 databases[target_name],
                                 source_name=source_name, 
                                 target_name=target_name,
-                                save_file=save_results
                             )
                             
                             # Création des statistiques pour le récapitulatif
