@@ -30,8 +30,8 @@ class Scopus_Researcher:
         self.scopus_id = str(scopus_id)
         self.api_key = scopus_api_key  # Définir avant l'appel à get_scopus_data
         self.insttoken = scopus_insttoken
-        self.df_scopus: pd.DataFrame = self.get_scopus_data()  # Appel après la définition des attributs
-
+        self.df_scopus: pd.DataFrame = self.error_message()
+        
     def get_scopus_data(self) -> list:
         """
         Récupère les données depuis l'API Scopus.
@@ -77,8 +77,21 @@ class Scopus_Researcher:
 
             if start_item >= max_items:
                 break
-        
         return JSON
+
+    def error_message(self):
+        try:
+            int_scopus_id = int(self.scopus_id)
+        except ValueError as err:
+            st.write(f"Pour Scopus :")
+            return st.error("Veuillez renseigner un Scopus ID sans lettre.")
+
+        if self.scopus_id == "":
+            st.write("Pour Scopus :1")
+            return st.error("Veuillez renseigner un Scopus ID.")
+        
+        if isinstance(int(int_scopus_id), int):
+            return self.get_scopus_data()
 
     def get_publication_scopus(self) -> pd.DataFrame:
         """
@@ -87,18 +100,20 @@ class Scopus_Researcher:
         Return:
             pd.DataFrame : DataFrame avec les données récupérées
         """
-        scopus_articles = self.df_scopus
-        data_list = []
-        for articles in scopus_articles:
-            data_list.append({
-                "Nom Publication": articles["prism:publicationName"],
-                "Date": articles["prism:coverDisplayDate"],
-                "pubmed-id": articles.get("pubmed-id", None),
-                "scopus_id": articles["dc:identifier"],
-                "doi": articles.get("prism:doi", "")
-            })
-        df = pd.DataFrame(data=data_list)
-        def extract_last_or_full(x:str) -> str:
+        if isinstance(self.df_scopus, list):
+            scopus_articles = self.df_scopus
+            data_list = []
+            for articles in scopus_articles:
+                data_list.append({
+                    "Nom Publication": articles["prism:publicationName"],
+                    "Date": articles["prism:coverDisplayDate"],
+                    "pubmed-id": articles.get("pubmed-id", None),
+                    "scopus_id": articles["dc:identifier"],
+                    "doi": articles.get("prism:doi", "")
+                })
+            df = pd.DataFrame(data=data_list)
+            
+            def extract_last_or_full(x:str) -> str:
                 """
                 Extrait le dernier mot ou la première phrase si le dernier mot n'est pas un nombre.
                 
@@ -110,6 +125,8 @@ class Scopus_Researcher:
                 """
                 words = x.split(" ")
                 return words[-1] if words[-1].isdigit() else x.split(" ")[0]
-        df["Date"] = df["Date"].apply(extract_last_or_full)
+            df["Date"] = df["Date"].apply(extract_last_or_full)
 
-        return df
+            return df
+        else:
+            return None

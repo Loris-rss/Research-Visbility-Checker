@@ -3,7 +3,6 @@ import streamlit as st
 
 import os
 
-
 from os import path
 from fonction import get_hal_researcher_data, Orcid_Researcher, Scopus_Researcher
 from utilitaire import reset_session, reach_st_donnee, reach_st_show_donnee, read_markdown_file
@@ -15,15 +14,13 @@ with st.expander("Guide d'utilisation pour la récupération des données.", exp
 
 # Téléversement des fichiers
 st.header("1. Rentrer les informations suivantes")
+
 databases = {}
 
 check_list = []
 
 # Option pour charger des exemples
-use_examples = st.checkbox("Utiliser les exemples fournis", value=False,)
-
-# Chargement des exemples.
-if use_examples:
+if st.checkbox("Utiliser les exemples fournis", value=False,):
     try:
         # Charger les exemples depuis le dossier ressources
         hal_df = pd.read_excel(path.relpath("ressources\hal_humbert.xlsx"))
@@ -45,7 +42,6 @@ if use_examples:
 else:
     if "show_hal_fields" not in st.session_state:
         st.session_state.show_hal_fields = False
-        # st.session_state["primary_button"] = "primary"
     if "show_scopus_fields" not in st.session_state:
         st.session_state.show_scopus_fields = False
     if "show_orcid_fields" not in st.session_state:
@@ -88,7 +84,7 @@ else:
 
     with col4:
         if st.button(
-            f"Web Of Science{"/Scopus" if os.getenv('SCOPUS_API_KEY') != 'YOUR_SCOPUS_API_KEY' else ''}", 
+            f"Web Of Science{"/Scopus" if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
             type="primary" if not st.session_state.show_wos_fields else "secondary",
             help="Récupérer les données WoS"
         ):
@@ -104,6 +100,8 @@ else:
         with last_name_col:
             researcher_last_name = st.text_input("Nom du chercheur :")
         check_list.append((researcher_first_name,researcher_last_name))
+    else:
+        pass
 
     # Afficher les champs ORCID si nécessaire
     if st.session_state.show_orcid_fields:
@@ -144,28 +142,32 @@ else:
     empty = st.empty()
 
     if empty.button("Lancer la récupération de données", type='primary'):
-        if len(check_list) < 2:
-            pass
-        
+        if len(check_list) < 1:
+            st.error("Veuillez renseigner au moins deux bases de données.")
         else:
             with st.spinner(""):
                 bar_perc = 0
                 progress_bar = empty.progress(bar_perc, text="Recherche des données orcid en cours...")
-                if orcid_researcher:
+                if st.session_state.show_orcid_fields:
                     orcid_df = Orcid_Researcher(orcid_link=orcid_researcher).format_df_orcids()
                 else:
-                    st.write("pas de données orcid")
                     pass
                 
                 bar_perc += 1
                 progress_bar.progress(bar_perc / 3, text="Recherche des données HAL en cours...") 
-                hal_df = get_hal_researcher_data(researcher_last_name, researcher_first_name)
+                
+                if st.session_state.show_hal_fields:
+                    hal_df = get_hal_researcher_data(researcher_last_name, researcher_first_name)
+                else:
+                    pass
                 
                 bar_perc += 1
                 progress_bar.progress(bar_perc/ 3, text="Recherche des données Scopus en cours...") 
                 
                 if st.session_state["show_scopus_fields"]:
-                    if len(scopus_id) >= 10:
+                    if len(scopus_id) == 0:
+                        st.error("Veuillez renseigner un Scopus ID.")
+                    elif len(scopus_id) >= 10:
                         scopus_df = Scopus_Researcher(scopus_id=scopus_id).get_publication_scopus()
                     else:
                         st.error("Le Scopus ID doit contenir au moins 10 chiffres.")
@@ -174,13 +176,15 @@ else:
                     pass
                 bar_perc += 1
                 progress_bar.progress(bar_perc / 3,text="Recherche des données en cours...") 
-            # try:
-            databases["HAL"] = hal_df
-            databases["Scopus"] = scopus_df if "Scopus" not in list(databases.keys()) else databases["Scopus"]
-            databases["Orcid"] = orcid_df
+            
+            # Ajout des données dans la base de données
+            if st.session_state.show_hal_fields:
+                databases["HAL"] = hal_df
+            if st.session_state.show_scopus_fields:
+                databases["Scopus"] = scopus_df if "Scopus" not in list(databases.keys()) else databases["Scopus"]
+            if st.session_state.show_orcid_fields:
+                databases["Orcid"] = orcid_df
             st.success("Données chargées avec succès.")
-            # except NameError as e:
-            #     st.write(e)
         empty.empty()
 
         st.session_state["databases"] = databases
@@ -189,6 +193,9 @@ st.divider()
 
 reset, comparaison = st.columns(2)
 with comparaison:
-    reach_st_show_donnee(message = "Montrer les données", type_button = 'primary')
+    if "databases" in st.session_state.keys():
+        reach_st_show_donnee(message = "Montrer les données", type_button = 'primary')
+    else:
+        pass
 with reset:
     reset_session()

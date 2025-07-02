@@ -1,3 +1,4 @@
+import streamlit as st
 import requests
 import pandas as pd
 
@@ -9,7 +10,7 @@ class Orcid_Researcher:
     - Récupérer les données depuis l'ORCID
     - Transformer les données récupérées en DataFrame
     """
-    def __init__(self,orcid_link:str):
+    def __init__(self, orcid_link:str):
         self.orcid_link = orcid_link
         self.df_orcid:pd.DataFrame = self.extract_ids_from_orcids()
         
@@ -20,7 +21,11 @@ class Orcid_Researcher:
         Returns :
             dict : données de l'ORCID
         """
-        return requests.get(self.orcid_link,headers={'Accept':'application/json'}).json()
+        if "https://orcid.org/" in self.orcid_link:
+            return requests.get(self.orcid_link,headers={'Accept':'application/json'}).json()
+        else:
+            st.write("Pour Orcid :")
+            return st.error("L'URL doit contenir https://orcid.org/")
 
     def extract_ids_from_orcids(self) -> pd.DataFrame:
         """
@@ -30,45 +35,47 @@ class Orcid_Researcher:
             pd.DataFrame : DataFrame avec les identifiants de l'ORCID
         """
         response_json = self.req_orcid()
-        doi_orcid_list = []
-        id_type_list = []
-        path_list = []
-        title_list = []
-        journal_title_list = []
-        year_list = []
+        if isinstance(response_json, dict):
+            doi_orcid_list = []
+            id_type_list = []
+            path_list = []
+            title_list = []
+            journal_title_list = []
+            year_list = []
 
-        path_json = response_json['activities-summary']['works']['group']
+            path_json = response_json['activities-summary']['works']['group']
 
-        for nb_publi in range(0, len(path_json)):
-            # On prend seulement le premier work-summary car c'est le même pour chaque groupe
-            work_summary = path_json[nb_publi]["work-summary"][0]
-            
-            # Récupération des informations de base
-            year = (work_summary["publication-date"].get("year", "NaN"))["value"]
-            path = work_summary["path"]
-            title = work_summary["title"]["title"]["value"]
-            journal_title = work_summary.get('journal-title') or {}
-            journal_title = journal_title.get("value", "NaN")
+            for nb_publi in range(0, len(path_json)):
+                # On prend seulement le premier work-summary car c'est le même pour chaque groupe
+                work_summary = path_json[nb_publi]["work-summary"][0]
+                
+                # Récupération des informations de base
+                year = (work_summary["publication-date"].get("year", "NaN"))["value"]
+                path = work_summary["path"]
+                title = work_summary["title"]["title"]["value"]
+                journal_title = work_summary.get('journal-title') or {}
+                journal_title = journal_title.get("value", "NaN")
 
-            # Pour chaque identifiant externe
-            external_ids = path_json[nb_publi]['external-ids']["external-id"]
-            for id in range(0, len(external_ids)):
-                year_list.append(year)
-                path_list.append(path)
-                title_list.append(title)
-                journal_title_list.append(journal_title)
-                id_type_list.append(external_ids[id]["external-id-type"])
-                doi_orcid_list.append(external_ids[id]["external-id-value"])
+                # Pour chaque identifiant externe
+                external_ids = path_json[nb_publi]['external-ids']["external-id"]
+                for id in range(0, len(external_ids)):
+                    year_list.append(year)
+                    path_list.append(path)
+                    title_list.append(title)
+                    journal_title_list.append(journal_title)
+                    id_type_list.append(external_ids[id]["external-id-type"])
+                    doi_orcid_list.append(external_ids[id]["external-id-value"])
+            return pd.DataFrame(data={
+                "Title": title_list,
+                "Journal title": journal_title_list,
+                "orcid path": path_list,
+                "type": id_type_list,
+                "value": doi_orcid_list,
+                "year": year_list
+            }).sort_values("type").reset_index(drop=True)
 
-        return pd.DataFrame(data={
-            "Title": title_list,
-            "Journal title": journal_title_list,
-            "orcid path": path_list,
-            "type": id_type_list,
-            "value": doi_orcid_list,
-            "year": year_list
-        }).sort_values("type").reset_index(drop=True)
-
+        else:   
+            return None            
     def check_id_missing(self) -> tuple[list, list]:
         """
         Vérifie la présence des identifiants dans un DataFrame.
@@ -84,7 +91,10 @@ class Orcid_Researcher:
         
         all_ids = ["other-id","pmc","doi","pmid","wosuid"]
         
-        ids_uniques = set(self.df_orcid["type"].unique())
+        if isinstance(self.df_orcid, pd.DataFrame):
+            ids_uniques = set(self.df_orcid["type"].unique())
+        else:
+            return None, None
         ids_presents = []
         ids_manquants = []
         
@@ -106,7 +116,10 @@ class Orcid_Researcher:
         Return:
             tuple[dict, list] : Tuple avec le dictionnaire de renommage et la liste des colonnes à supprimer.
         """
+        
         ids_present, ids_missing = self.check_id_missing()
+        if ids_present is None or ids_missing is None:
+            return None, None
         rename_dict = {}
         to_drop = []
 
@@ -139,19 +152,22 @@ class Orcid_Researcher:
         """
         rename_dict, to_drop = self.to_rename_and_drop()
 
-        orcid_df_sorted = self.df_orcid.sort_values("type").reset_index(drop=True)
-
-        # Obtenir les types uniques de la colonne 'type' pour créer une colonne par type.
-        types_ids = orcid_df_sorted["type"].unique()
-
-        # Créer une nouvelle colonne pour chaque type d'identification (ex: Orcid, Pubmed Id,WoS etc) et remplir ces colonnes avec les bons IDs.
-        for id_type in types_ids:
-            # Utiliser apply pour remplir chaque colonne en fonction de la condition sur 'type'.
-            orcid_df_sorted[id_type] = orcid_df_sorted.apply(lambda x: x["value"] if x["type"] == id_type else None, axis=1)
-
-        if to_drop:
-            # On enlève "other-id" et "pmc" parce qu'elles sont négligable et on renomme pour mettre en commun les noms avec WoS.
-            orcid_df_id_col = orcid_df_sorted.drop(to_drop,axis=1).rename(columns=rename_dict)
+        if self.df_orcid is None:
+            return None
         else:
-            orcid_df_id_col = orcid_df_sorted.rename(columns=rename_dict)
-        return orcid_df_id_col
+            orcid_df_sorted = self.df_orcid.sort_values("type").reset_index(drop=True)
+
+            # Obtenir les types uniques de la colonne 'type' pour créer une colonne par type.
+            types_ids = orcid_df_sorted["type"].unique()
+
+            # Créer une nouvelle colonne pour chaque type d'identification (ex: Orcid, Pubmed Id,WoS etc) et remplir ces colonnes avec les bons IDs.
+            for id_type in types_ids:
+                # Utiliser apply pour remplir chaque colonne en fonction de la condition sur 'type'.
+                orcid_df_sorted[id_type] = orcid_df_sorted.apply(lambda x: x["value"] if x["type"] == id_type else None, axis=1)
+
+            if to_drop:
+                # On enlève "other-id" et "pmc" parce qu'elles sont négligable et on renomme pour mettre en commun les noms avec WoS.
+                orcid_df_id_col = orcid_df_sorted.drop(to_drop,axis=1).rename(columns=rename_dict)
+            else:
+                orcid_df_id_col = orcid_df_sorted.rename(columns=rename_dict)
+            return orcid_df_id_col

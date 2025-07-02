@@ -18,7 +18,7 @@ def reset_session(message = "Annuler et reprendre au départ"):
     if st.button(message,type='secondary'):
         for key in st.session_state.keys():
             del st.session_state[key]
-        st.session_state["navigation"] = "1_st_choix_analyse.py"
+        st.session_state["navigation"] = "2_st_donnee.py"
         st.rerun()
 
 def reach_st_donnee(message = "Importer vos données", type_button = 'primary'):
