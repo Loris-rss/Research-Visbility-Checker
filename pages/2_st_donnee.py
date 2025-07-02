@@ -23,10 +23,10 @@ check_list = []
 if st.checkbox("Utiliser les exemples fournis", value=False,):
     try:
         # Charger les exemples depuis le dossier ressources
-        hal_df = pd.read_excel(path.relpath("ressources\hal_humbert.xlsx"))
-        scopus_df = pd.read_excel(path.relpath("ressources\scopus_mh.xlsx"))
-        orcid_df = pd.read_excel(path.relpath("ressources\orcid_publication.xlsx"))
-        wos_df = pd.read_excel(path.relpath("ressources\Marc Humbert WoS.xlsx"))
+        hal_df = pd.read_excel(path.relpath("ressources/hal_humbert.xlsx"))
+        scopus_df = pd.read_excel(path.relpath("ressources/scopus_mh.xlsx"))
+        orcid_df = pd.read_excel(path.relpath("ressources/orcid_publication.xlsx"))
+        wos_df = pd.read_excel(path.relpath("ressources/Marc Humbert WoS.xlsx"))
         
         databases["HAL"] = hal_df
         databases["Scopus"] = scopus_df
