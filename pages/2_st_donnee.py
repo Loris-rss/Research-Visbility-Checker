@@ -128,7 +128,7 @@ else:
     if st.session_state.show_wos_fields:
         # Téléversement des fichiers Web Of Science
         uploaded_files = st.file_uploader(
-            "Téléverser les fichiers Web Of Science", 
+            f"Téléverser les fichiers Web Of Science{'/Scopus' if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
             accept_multiple_files=True,
             type=["xlsx", "xls", "csv"]
         )
