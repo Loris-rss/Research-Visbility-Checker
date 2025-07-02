@@ -10,7 +10,7 @@ st.markdown("""
 )
 
 with st.expander("Présentation de l'application", expanded=False):
-    st.markdown(read_markdown_file(r"md\presentation_app.md"), unsafe_allow_html=True)
+    st.markdown(read_markdown_file(r"md/presentation_app.md"), unsafe_allow_html=True)
 
 st.divider()
 
