@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-
+from io import BytesIO
 from utilitaire import reset_session, reach_st_comparaison, reach_st_donnee, read_markdown_file
 
 st.title("3. Vérifier les données")
@@ -31,16 +31,21 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
         
         csv, xlsx = st.columns(2)
         with csv:
-            if st.download_button("Télécharger les données en csv", df.to_csv(f"{db_name}.csv", index=False), file_name=f"{db_name}.csv", mime="text/csv"):
+            csv_data = df.to_csv(index=False)
+            if st.download_button("Télécharger les données en csv", csv_data, file_name=f"{db_name}.csv", mime="text/csv"):
                 st.success("Les données ont été téléchargées avec succès.")
         with xlsx:
-            if st.download_button("Télécharger les données en excel", df.to_excel(f"{db_name}.xlsx", index=False), file_name=f"{db_name}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"):
+            output = BytesIO()
+            df.to_excel(output, index=False, engine='openpyxl')
+            xlsx_data = output.getvalue()
+            
+            if st.download_button("Télécharger les données en excel", xlsx_data, file_name=f"{db_name}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"):
                 st.success("Les données ont été téléchargées avec succès.")
 
         st.divider()
 
         st.markdown("## Distribution temporelle des publications")
-        # Distribution des publications par année
+        # Distribution des publications par anné
         with st.expander("Distribution temporelle des publications", expanded=False):
             st.markdown("""
             Cette section présente la répartition des publications scientifiques par année. Cela permet de visualiser l'évolution du volume de publications au fil du temps pour le chercheur sélectionné.
