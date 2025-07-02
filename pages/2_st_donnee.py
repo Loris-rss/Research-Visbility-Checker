@@ -10,7 +10,7 @@ from utilitaire import reset_session, reach_st_donnee, reach_st_show_donnee, rea
 st.title("Récupération des données")
 
 with st.expander("Guide d'utilisation pour la récupération des données.", expanded=False):
-    st.markdown(read_markdown_file(r"md\guide_utilisation_donnees.md"), unsafe_allow_html=True)
+    st.markdown(read_markdown_file(r"md/guide_utilisation_donnees.md"), unsafe_allow_html=True)
 
 # Téléversement des fichiers
 st.header("1. Rentrer les informations suivantes")

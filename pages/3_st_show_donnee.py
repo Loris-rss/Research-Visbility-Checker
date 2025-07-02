@@ -10,7 +10,7 @@ Cette page vous permet de visualiser et d'explorer les données collectées pour
 """)
 
 with st.expander("Guide de la page pour la visualisation des données.", expanded=False):
-    st.markdown(read_markdown_file(r"md\Visualisation des données.md"), unsafe_allow_html=True)
+    st.markdown(read_markdown_file(r"md/Visualisation des données.md"), unsafe_allow_html=True)
 
 st.write("Voici les données trouvées pour le chercheur :")
 
