@@ -152,7 +152,7 @@ else:
     empty = st.empty()
 
     if empty.button("Lancer la récupération de données", type='primary'):
-        if len(check_list) < 1:
+        if len(check_list) < 2:
             st.error("Veuillez renseigner au moins deux bases de données.")
         else:
             with st.spinner(""):
