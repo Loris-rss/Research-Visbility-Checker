@@ -49,11 +49,39 @@ else:
     if "show_wos_fields" not in st.session_state:
         st.session_state.show_wos_fields = False
 
-    if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY":
+    if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY": # API Key Available
         # Créer une ligne de boutons côte à côte
         col1, col2, col3, col4 = st.columns(4)
-    else:
+        with col4:
+            if st.button(
+                f"Web Of Science{"/Scopus" if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
+                type="primary" if not st.session_state.show_wos_fields else "secondary",
+                help="Récupérer les données WoS"
+            ):
+                st.session_state.show_wos_fields = not st.session_state.show_wos_fields
+                st.rerun()
+        
+        with col4:
+            if st.button(
+                f"Web Of Science{"/Scopus" if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
+                type="primary" if not st.session_state.show_wos_fields else "secondary",
+                help="Récupérer les données WoS"
+            ):
+                st.session_state.show_wos_fields = not st.session_state.show_wos_fields
+                st.rerun()
+        
+    else: # API Key Not Available
         col1, col2, col3 = st.columns(3)
+        with col3:
+            if st.button(
+                f"Web Of Science{"/Scopus" if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
+                type="primary" if not st.session_state.show_wos_fields else "secondary",
+                help="Récupérer les données WoS"
+            ):
+                st.session_state.show_wos_fields = not st.session_state.show_wos_fields
+                st.rerun()
+        st.warning("Vous n'avez pas de clé API Scopus. Veuillez la renseigner dans le fichier .env ou téléverser les données Scopus.")
+
 
     with col1:
         if st.button(
@@ -72,28 +100,6 @@ else:
         ):
             st.session_state.show_orcid_fields = not st.session_state.show_orcid_fields
             st.rerun()
-
-    if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY":
-        with col3:
-            if st.button(
-                "Scopus", 
-                type="primary" if not st.session_state.show_scopus_fields else "secondary",
-                help="Récupérer les données Scopus"
-                ):
-                st.session_state.show_scopus_fields = not st.session_state.show_scopus_fields
-                st.rerun()
-    else:
-        st.warning("Vous n'avez pas de clé API Scopus. Veuillez la renseigner dans le fichier .env ou téléverser les données Scopus.")
-
-    if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY":
-        with col4:
-            if st.button(
-                f"Web Of Science{"/Scopus" if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
-                type="primary" if not st.session_state.show_wos_fields else "secondary",
-                help="Récupérer les données WoS"
-            ):
-                st.session_state.show_wos_fields = not st.session_state.show_wos_fields
-                st.rerun()
 
     # Afficher les champs HAL si nécessaire
     if st.session_state.show_hal_fields:
