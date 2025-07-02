@@ -40,3 +40,4 @@ watchdog==6.0.0
 pip==25.0.1
 python-dotenv==1.1.0
 matplotlib==3.10.3
+xlsxwriter==3.2.5
