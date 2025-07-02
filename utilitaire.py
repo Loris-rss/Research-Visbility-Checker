@@ -175,11 +175,10 @@ def download_all_plots():
         zip_buffer.seek(0)
         return zip_buffer
     
-    if st.button("Télécharger tous les graphiques (ZIP)", type="primary"):
-        zip_data = create_zip_of_all_plots()
-        st.download_button(
-            label="📁 Télécharger le fichier ZIP",
-            data=zip_data,
-            file_name="tous_les_graphiques.zip",
-            mime="application/zip"
-        )
+    zip_data = create_zip_of_all_plots()
+    st.download_button(
+        label="📁 Télécharger le fichier ZIP",
+        data=zip_data,
+        file_name="tous_les_graphiques.zip",
+        mime="application/zip"
+    )
