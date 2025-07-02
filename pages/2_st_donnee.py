@@ -49,8 +49,11 @@ else:
     if "show_wos_fields" not in st.session_state:
         st.session_state.show_wos_fields = False
 
-    # Créer une ligne de boutons côte à côte
-    col1, col2, col3, col4 = st.columns(4)
+    if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY":
+        # Créer une ligne de boutons côte à côte
+        col1, col2, col3, col4 = st.columns(4)
+    else:
+        col1, col2, col3 = st.columns(3)
 
     with col1:
         if st.button(
