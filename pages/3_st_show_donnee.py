@@ -31,12 +31,10 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
         
         csv, xlsx = st.columns(2)
         with csv:
-            if st.button("Télécharger les données en csv", type = 'secondary', key = f"csv_{db_name}"):
-                df.to_csv(f"{db_name}.csv", index=False)
+            if st.download_button("Télécharger les données en csv", df.to_csv(f"{db_name}.csv", index=False), file_name=f"{db_name}.csv", mime="text/csv"):
                 st.success("Les données ont été téléchargées avec succès.")
         with xlsx:
-            if st.button("Télécharger les données en excel", type = 'secondary', key = f"xlsx_{db_name}"):
-                df.to_excel(f"{db_name}.xlsx", index=False)
+            if st.download_button("Télécharger les données en excel", df.to_excel(f"{db_name}.xlsx", index=False), file_name=f"{db_name}.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"):
                 st.success("Les données ont été téléchargées avec succès.")
 
         st.divider()
