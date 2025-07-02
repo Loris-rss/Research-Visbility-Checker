@@ -85,14 +85,15 @@ else:
     else:
         st.warning("Vous n'avez pas de clé API Scopus. Veuillez la renseigner dans le fichier .env ou téléverser les données Scopus.")
 
-    with col4:
-        if st.button(
-            f"Web Of Science{"/Scopus" if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
-            type="primary" if not st.session_state.show_wos_fields else "secondary",
-            help="Récupérer les données WoS"
-        ):
-            st.session_state.show_wos_fields = not st.session_state.show_wos_fields
-            st.rerun()
+    if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY":
+        with col4:
+            if st.button(
+                f"Web Of Science{"/Scopus" if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
+                type="primary" if not st.session_state.show_wos_fields else "secondary",
+                help="Récupérer les données WoS"
+            ):
+                st.session_state.show_wos_fields = not st.session_state.show_wos_fields
+                st.rerun()
 
     # Afficher les champs HAL si nécessaire
     if st.session_state.show_hal_fields:
