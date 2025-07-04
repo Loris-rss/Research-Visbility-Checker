@@ -11,7 +11,7 @@ def base_link(prefix: str = None, query:str = None) -> dict:
         prefix(str) : nom du domaine
         query(str) : information à rechercher, paramètre pouvant être utilisé. 
     """
-    # A documenter !!!!!!
+    # Lien de base
     root = f"https://api.archives-ouvertes.fr/{"ref/" + prefix 
                                             if prefix in ["anrproject","doctype","instance","metadata","structure","metadatalist","journal","domain","europeanproject","author"] 
                                             else "search/"}"
@@ -25,6 +25,9 @@ def id_author(lastName:str, firstName:str) -> list:
     Args :
         lastName(str) : Nom de l'auteur
         firstName(str) : prénom de l'auteur
+
+    Return:
+        list : liste des identifiants des auteurs
     """
     if not lastName:
         return "Erreur Recherche HAL : Veuillez renseigner le nom de famille."

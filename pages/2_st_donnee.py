@@ -124,7 +124,8 @@ else:
         scopus_id = st.text_input("Entrer le Socpus ID du chercheur :", 
                                 help="Exemple : '01234567891'.")
         check_list.append(scopus_id)
-    
+
+    # Afficher les champs Web Of Science si nécessaire.
     if st.session_state.show_wos_fields:
         # Téléversement des fichiers Web Of Science
         uploaded_files = st.file_uploader(
@@ -151,13 +152,17 @@ else:
                     databases[db_name] = df
     empty = st.empty()
 
+    # Lancer la récupération de données
     if empty.button("Lancer la récupération de données", type='primary'):
         if len(check_list) < 2:
             st.error("Veuillez renseigner au moins deux bases de données.")
         else:
+            # Récupération des données
             with st.spinner(""):
                 bar_perc = 0
                 progress_bar = empty.progress(bar_perc, text="Recherche des données orcid en cours...")
+                
+                # Récupération des données ORCID
                 if st.session_state.show_orcid_fields:
                     orcid_df = Orcid_Researcher(orcid_link=orcid_researcher).format_df_orcids()
                 else:
@@ -166,6 +171,7 @@ else:
                 bar_perc += 1
                 progress_bar.progress(bar_perc / 3, text="Recherche des données HAL en cours...") 
                 
+                # Récupération des données HAL
                 if st.session_state.show_hal_fields:
                     hal_df = get_hal_researcher_data(researcher_last_name, researcher_first_name)
                 else:
@@ -174,6 +180,7 @@ else:
                 bar_perc += 1
                 progress_bar.progress(bar_perc/ 3, text="Recherche des données Scopus en cours...") 
                 
+                # Récupération des données Scopus
                 if st.session_state["show_scopus_fields"]:
                     if len(scopus_id) == 0:
                         st.error("Veuillez renseigner un Scopus ID.")
@@ -201,11 +208,14 @@ else:
 
 st.divider()
 
+# Passer à la page suivante si les données sont chargées
 reset, comparaison = st.columns(2)
 with comparaison:
     if "databases" in st.session_state.keys():
         reach_st_show_donnee(message = "Montrer les données", type_button = 'primary')
     else:
         pass
+
+# Bouton pour réinitialiser la session
 with reset:
     reset_session()
