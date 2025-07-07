@@ -18,19 +18,28 @@ tabs = st.tabs(list(st.session_state["databases"].keys()))
 
 # Pour chaque onglet, afficher le DataFrame correspondant
 for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
+    # Afficher les données de la base de données
     with tab:
         st.header(f"Données de {db_name}")
+        # Supprimer la colonne "Unnamed: 0" si elle existe
         if "Unnamed: 0" in df.columns:
             df = df.drop(columns=["Unnamed: 0"])
+        
+        # Afficher le nombre d'articles de recherche trouvés
         st.write(f"{len(df)} articles de recherche trouvés.")
-        # Va falloir rajouter d'autres statistiques
+        
+        # Afficher les données dans un tableau
         st.dataframe(df)
+
+        # Définir les colonnes de date
         date_list_col = ["Year","year", "Date", "publicationDate_s", "Publication Year"]
 
+        # Définir la bonne colonne de date pour chaque dataframe
         right_col = "".join([col for col in df.columns if col in date_list_col])
-        
+    
         csv, xlsx = st.columns(2)
         
+        # Création du bouton de téléchargement en csv
         with csv:
             csv_data = df.to_csv(index=False).encode("utf-8")
 
@@ -42,6 +51,7 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
                 mime="text/csv"
             )
         
+        # Création du bouton de téléchargement en excel
         with xlsx:
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
@@ -50,7 +60,7 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
             # Repositionner le curseur du buffer au début
             output.seek(0)
 
-            # Télécharger via Streamlit
+            # Téléchargement des données en excel
             st.download_button(
                 label="Télécharger les données en excel",
                 data=output,
@@ -62,6 +72,7 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
         st.divider()
 
         st.markdown("## Distribution temporelle des publications")
+        
         # Distribution des publications par année
         with st.expander("Distribution temporelle des publications", expanded=False):
             st.markdown("""
@@ -72,6 +83,7 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
 
 st.divider()
 
+# Création des boutons de réinitialisation et de retour
 reset, back, forward = st.columns(3)
 with reset:
     reset_session()

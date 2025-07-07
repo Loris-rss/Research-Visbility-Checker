@@ -3,7 +3,7 @@ import pandas as pd
 
 def markdown_title(title:str) -> st.markdown:
     """
-    Permet d'afficher un titre dans le markdown.
+    Permet d'afficher un sous-titre dans le markdown.
     
     Args :
         title(str) : titre à afficher

@@ -50,13 +50,15 @@ st.markdown("## Comparaison de vos bases de données.")
     
 #     st.divider()
 
-# if st.button("Lancer la comparaison de toutes les bases",key="compare_all_databases", type = 'primary'):
+# Si aucune base de données n'est chargée
 if "databases" not in st.session_state.keys():
     st.error("Veuillez téléverser au moins deux bases de données pour effectuer une comparaison.")
     reach_st_donnee(message = "Revenir à l'importation des données", type_button = 'secondary')
 else:
     compare_all_databases(st.session_state["databases"])
 
+
+# Si des graphiques sont disponibles
 if "plot_pie_chart" in st.session_state.keys():
     st.divider()
     st.markdown("## Télécharger un graphique ou plusieurs graphiques ?")
@@ -73,8 +75,10 @@ else:
     pass
 
 st.divider()
+
 reset, deux = st.columns(2)
 
+# Bouton pour réinitialiser la session
 with reset:
     reset_session()
 
