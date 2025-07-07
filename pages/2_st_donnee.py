@@ -80,7 +80,7 @@ else:
             ):
                 st.session_state.show_wos_fields = not st.session_state.show_wos_fields
                 st.rerun()
-        st.warning("Vous n'avez pas de clé API Scopus. Veuillez la renseigner dans le fichier .env ou téléverser les données Scopus.")
+        # st.warning("Vous n'avez pas de clé API Scopus. Veuillez la renseigner dans le fichier .env ou téléverser les données Scopus.")
 
 
     with col1:
@@ -104,12 +104,22 @@ else:
     # Afficher les champs HAL si nécessaire
     if st.session_state.show_hal_fields:
         st.session_state.primary_button = "secondary"
-        last_name_col, first_name_col = st.columns(2)
-        with first_name_col:
-            researcher_first_name = st.text_input("Prénom du chercheur :")
-        with last_name_col:
-            researcher_last_name = st.text_input("Nom du chercheur :")
-        check_list.append((researcher_first_name,researcher_last_name))
+        
+        search_by = st.radio(label = "Recherche HAL par : ", options=["Nom et prénom", "ID HAL"], index=0)
+        
+        st.session_state.search_by = search_by
+
+        if search_by == "Nom et prénom":
+            last_name_col, first_name_col = st.columns(2)
+            with first_name_col:
+                researcher_first_name = st.text_input("Prénom du chercheur :")
+            with last_name_col:
+                researcher_last_name = st.text_input("Nom du chercheur :")
+            check_list.append((researcher_first_name,researcher_last_name))
+        
+        elif search_by == "ID HAL":
+            id_hal = st.text_input("ID HAL du chercheur :")
+            check_list.append(id_hal)
     else:
         pass
 
@@ -149,7 +159,7 @@ else:
                 
                 # Ajouter à la liste des bases de données
                 if db_name not in list(databases.keys()):
-                    databases[db_name] = df
+                    databases[f"Publication {db_name}"] = df
     empty = st.empty()
 
     # Lancer la récupération de données
@@ -173,7 +183,10 @@ else:
                 
                 # Récupération des données HAL
                 if st.session_state.show_hal_fields:
-                    hal_df = get_hal_researcher_data(researcher_last_name, researcher_first_name)
+                    if st.session_state.search_by == "Nom et prénom":
+                        hal_df = get_hal_researcher_data(researcher_last_name, researcher_first_name)
+                    elif st.session_state.search_by == "ID HAL":
+                        hal_df = get_hal_researcher_data(idhal=id_hal)
                 else:
                     pass
                 
@@ -196,15 +209,19 @@ else:
             
             # Ajout des données dans la base de données
             if st.session_state.show_hal_fields:
-                databases["HAL"] = hal_df
+                databases["Publication HAL"] = hal_df
             if st.session_state.show_scopus_fields:
-                databases["Scopus"] = scopus_df if "Scopus" not in list(databases.keys()) else databases["Scopus"]
+                databases["Publication Scopus"] = scopus_df if "Scopus" not in list(databases.keys()) else databases["Scopus"]
             if st.session_state.show_orcid_fields:
-                databases["Orcid"] = orcid_df
+                databases["Publication Orcid"] = orcid_df
             st.success("Données chargées avec succès.")
         empty.empty()
 
         st.session_state["databases"] = databases
+
+if os.getenv("SCOPUS_API_KEY") == "YOUR_SCOPUS_API_KEY":
+        st.warning("Vous n'avez pas de clé API Scopus. Veuillez la renseigner dans le fichier .env ou téléverser les données Scopus.")
+
 
 st.divider()
 

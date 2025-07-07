@@ -18,6 +18,17 @@ def base_link(prefix: str = None, query:str = None) -> dict:
     endpoint = f"?q={query}&wt=json"
     return requests.get(root+endpoint).json()
 
+def req_id_hal(idhal:str) -> list:
+    root = f"https://api.archives-ouvertes.fr/ref/author"
+    endpoint = f"?q=idHal_s:{idhal}&wt=json"
+    req = requests.get(root+endpoint).json()
+
+    if req["response"]["numFound"] == 0:
+        return "Erreur Recherche HAL : Nous n'avons pas trouvé de données\nVérifiez les informations renseignées."
+    else:
+        docid = [a["docid"] for a in req["response"]["docs"]]
+        return docid
+
 def id_author(lastName:str, firstName:str) -> list:
     """
     Cette fonction permet de rechercher les identifiants des auteurs que vous souhaitez.
@@ -49,7 +60,7 @@ def id_author(lastName:str, firstName:str) -> list:
             id_auth.append(docid) # .split("-")[1]
     return id_auth
 
-def get_hal_researcher_data(lastName:str,firstName:str) -> pd.DataFrame:
+def get_hal_researcher_data(lastName:str = None, firstName:str = None, idhal:str = None) -> pd.DataFrame:
     """
     Cette fonction permet de rechercher les identifiants des auteurs que vous souhaitez.
     
@@ -62,7 +73,13 @@ def get_hal_researcher_data(lastName:str,firstName:str) -> pd.DataFrame:
     """
 
     # authIdForm_i:158428 -> Marc Humbert -> 449
-    ids = id_author(lastName = lastName, firstName=firstName)
+    if lastName and firstName:
+        ids = id_author(lastName = lastName, firstName=firstName)
+    elif idhal:
+        ids = req_id_hal(idhal=idhal)
+    else:
+        return "Erreur Recherche HAL : Veuillez renseigner le nom et le prénom ou l'ID HAL."
+
     if isinstance(ids, list):
         data_hal = []
         for id in ids:
