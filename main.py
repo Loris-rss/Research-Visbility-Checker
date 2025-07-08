@@ -6,14 +6,15 @@ from utilitaire import read_markdown_file
 st.set_page_config("Research Visibility Checker", layout="wide")
 
 st.markdown("""
-# Bienvenue sur Research Visibility Checker !"""
-)
+<div style="text-align: center;">
+    <h1>Bienvenue sur Research Visibility Checker !</h1>
+</div>""", 
+    unsafe_allow_html=True)
 
 with st.expander("Présentation de l'application", expanded=False):
     st.markdown(read_markdown_file(r"md/presentation_app.md"), unsafe_allow_html=True)
 
 st.divider()
-
 
 def main():
     if "navigation" not in st.session_state:

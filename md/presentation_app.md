@@ -15,3 +15,10 @@
     2. Ajoutez des fichiers supplémentaires si nécessaire (Web of Science, etc.)
     3. Les données sont automatiquement récupérées depuis HAL, ORCID et Scopus
     4. Lancez l'analyse pour visualiser les recoupements
+
+<div> 
+    <h3> Si vous voulez regarder le code source de l'application :</h3>
+</div>
+<div>
+    <a href="https://gitlab.dsi.universite-paris-saclay.fr/dibiso1/research-visibility-checker">Lien vers le repository GitHub</a>
+</div>
