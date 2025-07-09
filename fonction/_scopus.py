@@ -5,7 +5,7 @@ import streamlit as st
 import os
 
 from dotenv import load_dotenv
-load_dotenv(r".env")
+load_dotenv(".env")
 scopus_api_key = os.getenv("SCOPUS_API_KEY")
 scopus_insttoken = os.getenv("SCOPUS_INSTTOKEN")
 

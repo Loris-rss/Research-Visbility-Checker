@@ -211,7 +211,7 @@ else:
             if st.session_state.show_hal_fields:
                 databases["Publication HAL"] = hal_df
             if st.session_state.show_scopus_fields:
-                databases["Publication Scopus"] = scopus_df if "Scopus" not in list(databases.keys()) else databases["Scopus"]
+                databases["Publication Scopus"] = scopus_df if "Publication Scopus" not in list(databases.keys()) else databases["Publication Scopus"]
             if st.session_state.show_orcid_fields:
                 databases["Publication Orcid"] = orcid_df
             st.success("Données chargées avec succès.")
