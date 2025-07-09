@@ -1,6 +1,7 @@
+from io import BytesIO
+
 import streamlit as st
 import pandas as pd
-from io import BytesIO
 from utilitaire import reset_session, reach_st_comparaison, reach_st_donnee, read_markdown_file
 
 st.title("3. Vérifier les données")
@@ -21,13 +22,23 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
     # Afficher les données de la base de données
     with tab:
         st.header(f"Données de {db_name}")
+        # Vérifier que df est bien un DataFrame
+        if not isinstance(df, pd.DataFrame):
+            st.error(f"❌ Erreur : Les données de {db_name} ne sont pas dans le bon format.")
+            st.write(f"Type reçu : {type(df)}")
+            st.write(f"Contenu : {df}")
+            st.info("💡 Retournez à l'étape d'importation des données pour corriger le problème.")
+            continue
         # Supprimer la colonne "Unnamed: 0" si elle existe
+        st.write(f"📊 Colonnes disponibles : {list(df.columns)}")   
         if "Unnamed: 0" in df.columns:
-            df = df.drop(columns=["Unnamed: 0"])
-        
+            df = df.drop(columns=["Unnamed: 0"])     
         # Afficher le nombre d'articles de recherche trouvés
-        st.write(f"{len(df)} articles de recherche trouvés.")
-        
+        st.write(f"📚 **{len(df)} articles de recherche trouvés.**")     
+        # Vérifier que le DataFrame n'est pas vide
+        if df.empty:
+            st.warning(f"⚠️ Aucune donnée trouvée pour {db_name}")
+            continue     
         # Afficher les données dans un tableau
         st.dataframe(df)
 

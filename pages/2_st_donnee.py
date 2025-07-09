@@ -20,7 +20,7 @@ databases = {}
 check_list = []
 
 # Option pour charger des exemples
-if st.checkbox("Utiliser les exemples fournis", value=False,):
+if st.checkbox("Utiliser les exemples fournis", value=False):
     try:
         # Charger les exemples depuis le dossier ressources
         hal_df = pd.read_excel(path.relpath("ressources/hal_humbert.xlsx"))
@@ -40,131 +40,111 @@ if st.checkbox("Utiliser les exemples fournis", value=False,):
         st.error(f"Erreur lors du chargement des exemples: {str(e)}")
 
 else:
-    if "show_hal_fields" not in st.session_state:
-        st.session_state.show_hal_fields = False
-    if "show_scopus_fields" not in st.session_state:
-        st.session_state.show_scopus_fields = False
-    if "show_orcid_fields" not in st.session_state:
-        st.session_state.show_orcid_fields = False
-    if "show_wos_fields" not in st.session_state:
-        st.session_state.show_wos_fields = False
-
-    if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY": # API Key Available
-        # Créer une ligne de boutons côte à côte
-        col1, col2, col3, col4 = st.columns(4)
-        with col3:
-            if st.button(
-                "Scopus", 
-                type="primary" if not st.session_state.show_wos_fields else "secondary",
-                help="Récupérer les données WoS"
-            ):
-                st.session_state.show_scopus_fields = not st.session_state.show_scopus_fields
-                st.rerun()
+    with st.expander("Récupérer les données HAL :", expanded=False):
+        search_by = st.radio(label = "Recherche HAL par : ", options=["Nom et prénom", "ID HAL"])
         
-        with col4:
-            if st.button(
-                f"Web Of Science{"/Scopus" if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
-                type="primary" if not st.session_state.show_wos_fields else "secondary",
-                help="Récupérer les données WoS"
-            ):
-                st.session_state.show_wos_fields = not st.session_state.show_wos_fields
-                st.rerun()
-        
-    else: # API Key Not Available
-        col1, col2, col3 = st.columns(3)
-        with col3:
-            if st.button(
-                f"Web Of Science{"/Scopus" if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
-                type="primary" if not st.session_state.show_wos_fields else "secondary",
-                help="Récupérer les données WoS"
-            ):
-                st.session_state.show_wos_fields = not st.session_state.show_wos_fields
-                st.rerun()
-        # st.warning("Vous n'avez pas de clé API Scopus. Veuillez la renseigner dans le fichier .env ou téléverser les données Scopus.")
+        st.session_state["search_by"] = search_by
+        st.write(st.session_state["search_by"])
 
-
-    with col1:
-        if st.button(
-            "HAL", 
-            type="primary" if st.session_state.show_hal_fields == False else "secondary",
-            help="Récupérer les données HAL"
-        ):
-            st.session_state.show_hal_fields = not st.session_state.show_hal_fields
-            st.rerun()
-
-    with col2:
-        if st.button(
-            "ORCID", 
-            type="primary" if not st.session_state.show_orcid_fields else "secondary",
-            help="Récupérer les données ORCID"
-        ):
-            st.session_state.show_orcid_fields = not st.session_state.show_orcid_fields
-            st.rerun()
-
-    # Afficher les champs HAL si nécessaire
-    if st.session_state.show_hal_fields:
-        st.session_state.primary_button = "secondary"
-        
-        search_by = st.radio(label = "Recherche HAL par : ", options=["Nom et prénom", "ID HAL"], index=0)
-        
-        st.session_state.search_by = search_by
-
-        if search_by == "Nom et prénom":
+        if st.session_state["search_by"] == "Nom et prénom":
             last_name_col, first_name_col = st.columns(2)
             with first_name_col:
                 researcher_first_name = st.text_input("Prénom du chercheur :")
+                if researcher_first_name:
+                    st.session_state["researcher_first_name"] = researcher_first_name
+                    st.success(f"Prénom du chercheur : {researcher_first_name}")
+                else:
+                    pass
             with last_name_col:
                 researcher_last_name = st.text_input("Nom du chercheur :")
-            check_list.append((researcher_first_name,researcher_last_name))
-        
-        elif search_by == "ID HAL":
-            id_hal = st.text_input("ID HAL du chercheur :")
+                if researcher_last_name:
+                    st.session_state["researcher_last_name"] = researcher_last_name
+                    st.success(f"Nom du chercheur : {researcher_last_name}")
+                else:
+                    pass
+            
+            if researcher_first_name and researcher_last_name:
+                check_list.append((researcher_first_name,researcher_last_name))
+                        
+        elif st.session_state["search_by"] == "ID HAL":
+            id_hal = st.text_input("ID HAL du chercheur :",key="id_hal")
+            st.session_state["id_hal"] = id_hal
+            st.success(f"ID HAL du chercheur : {id_hal}")
+           
             check_list.append(id_hal)
-    else:
-        pass
-
-    # Afficher les champs ORCID si nécessaire
-    if st.session_state.show_orcid_fields:
+        
+    with st.expander("Récupérer les données Orcid :", expanded=False):
         orcid_researcher = st.text_input("Veuillez saisir l'URL vers le profil ORCID du chercheur :", 
                                     help="Veuillez saisir le lien URL complet.")
         check_list.append(orcid_researcher)
+    
+    if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY": # API Key Available
+        # Créer une ligne de boutons côte à côte
+        
+        with st.expander("Récupérer les données Scopus :", expanded=False):
+            scopus_id = st.text_input("Entrer le Socpus ID du chercheur :", 
+                                    help="Exemple : '01234567891'.")
+            check_list.append(scopus_id)
 
-    # Afficher les champs Scopus si nécessaire
-    if st.session_state.show_scopus_fields:
-        scopus_id = st.text_input("Entrer le Socpus ID du chercheur :", 
-                                help="Exemple : '01234567891'.")
-        check_list.append(scopus_id)
+        with st.expander("Récupérer les données WoS :", expanded=False):
+            # Téléversement des fichiers Web Of Science
+            uploaded_files = st.file_uploader(
+                f"Téléverser les fichiers Web Of Science{'/Scopus' if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
+                accept_multiple_files=True,
+                type=["xlsx", "xls", "csv"]
+            )
+            check_list.append(uploaded_files)
+            if uploaded_files:
+                for file in uploaded_files:
+                    # Déterminer le nom de la base de données à partir du nom du fichier
+                    db_name = file.name.split(".")[0].capitalize()
+                    
+                    st.markdown(f"#### Fichier: {file.name}")
 
-    # Afficher les champs Web Of Science si nécessaire.
-    if st.session_state.show_wos_fields:
-        # Téléversement des fichiers Web Of Science
-        uploaded_files = st.file_uploader(
-            f"Téléverser les fichiers Web Of Science{'/Scopus' if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
-            accept_multiple_files=True,
-            type=["xlsx", "xls", "csv"]
-        )
-        check_list.append(uploaded_files)
-        if uploaded_files:
-            for file in uploaded_files:
-                # Déterminer le nom de la base de données à partir du nom du fichier
-                db_name = file.name.split(".")[0].capitalize()
-                
-                st.markdown(f"#### Fichier: {file.name}")
+                    # Lecture du fichier selon son type
+                    if file.name.endswith('.csv'):
+                        df = pd.read_csv(file)
+                    else:
+                        df = pd.read_excel(file)
+                    
+                    # Ajouter à la liste des bases de données
+                    if db_name not in list(databases.keys()):
+                        databases[f"Publication {db_name}"] = df
+    
+    else: # API Key not Available
+        with st.expander("Récupérer les données WoS/Scopus :", expanded=False):
+            uploaded_files = st.file_uploader(
+                f"Téléverser les fichiers Web Of Science{'/Scopus' if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
+                accept_multiple_files=True,
+                type=["xlsx", "xls", "csv"]
+            )
+            check_list.append(uploaded_files)
+            
+            # Si des fichiers sont téléversés
+            if uploaded_files:
+                for file in uploaded_files:
+                    # Déterminer le nom de la base de données à partir du nom du fichier
+                    db_name = file.name.split(".")[0].capitalize()
+                    
+                    st.markdown(f"#### Fichier: {file.name}")
 
-                # Lecture du fichier selon son type
-                if file.name.endswith('.csv'):
-                    df = pd.read_csv(file)
-                else:
-                    df = pd.read_excel(file)
-                
-                # Ajouter à la liste des bases de données
-                if db_name not in list(databases.keys()):
-                    databases[f"Publication {db_name}"] = df
+                    # Lecture du fichier selon son type
+                    if file.name.endswith('.csv'):
+                        df = pd.read_csv(file)
+                    else:
+                        df = pd.read_excel(file)
+                    
+                    # Ajouter à la liste des bases de données
+                    if db_name not in list(databases.keys()):
+                        databases[f"Publication {db_name}"] = df
+
+            st.session_state.show_hal_fields = not st.session_state.show_hal_fields
+
     empty = st.empty()
 
     # Lancer la récupération de données
     if empty.button("Lancer la récupération de données", type='primary'):
-        if len(check_list) < 1:
+        if len(check_list) < 2:
             st.error("Veuillez renseigner au moins deux bases de données.")
         else:
             # Récupération des données

@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
+from venn import venn
 
 class TxRecoupement:
     """
@@ -370,6 +371,7 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
         # ---- 4. Calcul des statistiques ---- 
         total_source = len(source)
         found_in_target = source[in_target_col].sum()
+        found_in_source = len(source) - found_in_target
         percentage = (found_in_target / total_source) * 100 if total_source > 0 else 0
         
         # ---- 5. Création d'une colonne de statut ---- 
@@ -384,48 +386,110 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
         
         st.subheader("Résultats")
         
-        col1, col2 = st.columns(2)
+        show1, show2 = st.columns(2)
         
-        with col1:
+        with show1:
             st.metric("Publications dans " + source_name, total_source)
+            # st.metric("Dont publications trouvées dans " + target_name, found_in_target)
+        
+        with show2:
+            st.metric("Publications dans " + target_name, len(target))
+            # st.metric("Dont publications trouvées dans " + source_name, found_in_source)    
+        
+        result1, tx_recoup = st.columns(2)
+        with result1:
             st.metric("Dont publications trouvées dans " + target_name, found_in_target)
-        
-        with col2:
-            st.metric("Taux de recoupement", f"{percentage:.2f}%")
 
-            def create_pie_chart(source_name, target_name, values, ax):
-                # Configuration des styles pour chaque catégorie
-                resultat = values[f"Pas dans {target_name}"] > values[f"Dans {target_name}"]
+        with tx_recoup:
+            st.metric("Taux de recoupement", f"{percentage:.2f}%", help=f"Taux de recoupement entre les publications de {target_name} et de {target_name}")
+
+        def create_venn_diagram(source_name, target_name, source_ids, target_ids):
+            """
+            Crée un diagramme de Venn pour visualiser les recoupements.
+            """
+            st.divider()
+            venn_graph, resultats = st.columns(2)
+            # Nettoyer les ensembles des valeurs NaN
+            set1 = {str(id_val) for id_val in source_ids if pd.notna(id_val) and str(id_val).strip() != ''}
+            set2 = {str(id_val) for id_val in target_ids if pd.notna(id_val) and str(id_val).strip() != ''}
+            
+            # Créer le dictionnaire pour venn()
+            dataset_dict = {
+                f'Publications {source_name}': set1,
+                f'Publications {target_name}': set2
+            }
+        
+            fig, ax = plt.subplots(figsize=(8, 6))
+            
+
+            # Créer le diagramme de Venn avec formatage
+            venn(dataset_dict, 
+                    fmt="{size}\n({percentage:.1f}%)",
+                    fontsize=10,
+                    legend_loc='upper right',
+                    ax=ax)
                 
-                # Configuration des styles en fonction de la valeur la plus grande
-                if resultat:
-                    # Réorganiser les valeurs pour qu'elles correspondent aux labels
-                    labels = [f"Pas dans {target_name}", f"Dans {target_name}"]
-                    colors = ["red", "green"]
-                
-                else:
-                    labels = [f"Dans {target_name}", f"Pas dans {target_name}"]
-                    colors = ["green", "red"]
-                    
-                
-                # Créer le graphique
-                ax.pie(values, 
-                    labels=labels,
-                    colors=colors,
-                    explode=[0.05, 0],
-                    autopct="%1.1f%%")
-                ax.set_title(f'Proportion des articles {source_name} présents dans {target_name}')
-                
-                if "plot_pie_chart" not in st.session_state.keys():
-                    st.session_state["plot_pie_chart"] = {f"{source_name}-{target_name}": fig}
-                else:
-                    st.session_state["plot_pie_chart"][f"{source_name}-{target_name}"] = fig
+            plt.title(f"Recoupements entre {source_name} et {target_name}", 
+                        fontsize=12, fontweight='bold')
+            plt.tight_layout()
+            
+            # Sauvegarder dans session_state
+            if "plot_venn_diagram" not in st.session_state.keys():
+                st.session_state["plot_venn_diagram"] = {f"{source_name}-{target_name}": fig}
+            else:
+                st.session_state["plot_venn_diagram"][f"{source_name}-{target_name}"] = fig
+            
+            with venn_graph:    
+                # Afficher le diagramme
                 st.pyplot(fig)
+            
+            # Afficher les statistiques détaillées
+            intersection = len(set1 & set2)
+            only_source = len(set1 - set2)
+            only_target = len(set2 - set1)
+            total_unique = len(set1 | set2)
+            
+            with resultats:
+                st.markdown(f"""
+                **📊 Statistiques détaillées :**
+                - 📚 Publications uniquement dans {source_name} : **{only_source}**
+                - 📚 Publications uniquement dans {target_name} : **{only_target}**
+                - 🔗 Publications communes : **{intersection}**
+                - 📖 Total de publications uniques : **{total_unique}**
+                - 🎯 Taux de recouvrement : **{(intersection/total_unique)*100:.1f}%**
+                """)
 
-            fig, ax = plt.subplots(figsize=(4, 4))
-            status_counts = source[status_col].value_counts()
-            create_pie_chart(source_name, target_name, status_counts, ax)
+        # Extraire tous les identifiants uniques de chaque DataFrame
+        source_ids = set()
+        target_ids = set()
+
+        source_for_venn = set(f"source_{i}" for i in range(total_source))
+        target_for_venn = set(f"target_{i}" for i in range(len(target))) 
         
+        intersection_for_venn = set(f"common_{i}" for i in range(found_in_target))
+        
+        # Reconstruire les ensembles avec l'intersection correcte
+        source_final = set()
+        target_final = set()
+        
+        # Ajouter les publications communes aux deux ensembles
+        for pub in intersection_for_venn:
+            source_final.add(pub)
+            target_final.add(pub)
+        
+        # Ajouter les publications uniquement dans la source
+        only_in_source = total_source - found_in_target
+        for i in range(only_in_source):
+            source_final.add(f"only_source_{i}")
+        
+        only_in_target = len(target) - found_in_target
+        for i in range(only_in_target):
+            target_final.add(f"only_target_{i}")
+
+        create_venn_diagram(source_name, target_name, source_final, target_final)
+        
+        st.divider()
+
         # ---- 7. Affichage des tableaux ---- 
         st.subheader("Détail des résultats")
         tabs = st.tabs(["Tous les articles", f"Communs ({found_in_target})", f"Non trouvés ({total_source - found_in_target})"])
