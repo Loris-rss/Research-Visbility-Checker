@@ -1,7 +1,6 @@
 import streamlit as st
 
-from fonction import compare_all_databases, suggest_column_mapping, compare_publication_databases
-from fonction import TxRecoupement, CheckResearcherInPaper
+from fonction import compare_all_databases
 
 from utilitaire import reset_session, reach_st_donnee, download_plot, download_all_plots
 
@@ -29,7 +28,7 @@ else:
 if "plot_pie_chart" in st.session_state.keys():
     st.divider()
     st.markdown("## Télécharger un graphique ou plusieurs graphiques ?")
-    
+
     dl_choice = st.radio(label = "", options=["Un graphique", "Tous les graphiques"], index=0)
     
     if dl_choice == "Un graphique":

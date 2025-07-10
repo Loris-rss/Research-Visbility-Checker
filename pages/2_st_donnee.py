@@ -1,7 +1,8 @@
 import pandas as pd
 import streamlit as st
-
+import sys
 import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from os import path
 from fonction import get_hal_researcher_data, Orcid_Researcher, Scopus_Researcher

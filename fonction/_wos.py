@@ -25,7 +25,6 @@ class CheckResearcherInPaper():
         """
         self.dataframe = dataframe
         self.name_of_auth = name_of_auth
-        pass
 
     def researcher_in_paper(self) -> pd.DataFrame:
         """
