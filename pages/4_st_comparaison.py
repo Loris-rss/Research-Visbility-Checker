@@ -22,10 +22,9 @@ if "databases" not in st.session_state.keys():
     reach_st_donnee(message = "Revenir à l'importation des données", type_button = 'secondary')
 else:
     compare_all_databases(st.session_state["databases"])
-
-
+    
 # Si des graphiques sont disponibles
-if "plot_pie_chart" in st.session_state.keys():
+if "plot_venn_diagram" in st.session_state.keys():
     st.divider()
     st.markdown("## Télécharger un graphique ou plusieurs graphiques ?")
 

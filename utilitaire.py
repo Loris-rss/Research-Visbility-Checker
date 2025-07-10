@@ -122,7 +122,7 @@ def download_plot():
         """Fonction callback vide pour éviter le refresh de la page"""
         pass
     
-    selecton_plot = st.selectbox("Choisissez la base de données", options=st.session_state["plot_pie_chart"].keys())
+    selecton_plot = st.selectbox("Choisissez la base de données", options=st.session_state["plot_venn_diagram"].keys())
 
     formats = ["png", "jpeg", "svg", "pdf"]
 
@@ -132,7 +132,7 @@ def download_plot():
         index=0,
     )
 
-    fig = st.session_state["plot_pie_chart"][selecton_plot]
+    fig = st.session_state["plot_venn_diagram"][selecton_plot]
 
     # Convert the figure to PNG in-memory
     buf = io.BytesIO()
@@ -155,7 +155,7 @@ def download_all_plots():
         None : Affiche le bouton de téléchargement pour tous les graphiques
     """
     
-    if "plot_pie_chart" not in st.session_state or not st.session_state["plot_pie_chart"]:
+    if "plot_venn_diagram" not in st.session_state or not st.session_state["plot_venn_diagram"]:
         st.warning("Aucun graphique disponible pour le téléchargement.")
         return
     
@@ -166,7 +166,7 @@ def download_all_plots():
         zip_buffer = io.BytesIO()
         
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            for plot_name, fig in st.session_state["plot_pie_chart"].items():
+            for plot_name, fig in st.session_state["plot_venn_diagram"].items():
                 img_buffer = io.BytesIO()
                 fig.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
                 img_buffer.seek(0)
