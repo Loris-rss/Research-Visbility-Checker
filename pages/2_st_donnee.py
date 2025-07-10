@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from os import path
 from fonction import get_hal_researcher_data, Orcid_Researcher, Scopus_Researcher
-from utilitaire import reset_session, reach_st_donnee, reach_st_show_donnee, read_markdown_file
+from utilitaire import reset_session, reach_st_show_donnee, read_markdown_file
 
 st.title("Récupération des données")
 
@@ -68,16 +68,23 @@ else:
                 check_list.append((researcher_first_name,researcher_last_name))
                         
         elif st.session_state["search_by"] == "ID HAL":
-            id_hal = st.text_input("ID HAL du chercheur :",key="id_hal")
-            st.session_state["id_hal"] = id_hal
-            st.success(f"ID HAL du chercheur : {id_hal}")
-           
-            check_list.append(id_hal)
+            id_hal = st.text_input("ID HAL du chercheur :")
+            if id_hal:
+                st.session_state["id_hal"] = id_hal
+                st.success(f"ID HAL du chercheur : {id_hal}")
+                check_list.append(id_hal)
+            else:
+                pass
         
     with st.expander("Récupérer les données Orcid :", expanded=False):
         orcid_researcher = st.text_input("Veuillez saisir l'URL vers le profil ORCID du chercheur :", 
                                     help="Veuillez saisir le lien URL complet.")
-        check_list.append(orcid_researcher)
+        if orcid_researcher:
+            st.session_state["orcid_researcher"] = orcid_researcher
+            st.success(f"ORCID du chercheur : {orcid_researcher}")
+            check_list.append(orcid_researcher)
+        else:
+            pass
     
     if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY": # API Key Available
         # Créer une ligne de boutons côte à côte
@@ -85,12 +92,17 @@ else:
         with st.expander("Récupérer les données Scopus :", expanded=False):
             scopus_id = st.text_input("Entrer le Socpus ID du chercheur :", 
                                     help="Exemple : '01234567891'.")
-            check_list.append(scopus_id)
+            if scopus_id:
+                st.session_state["scopus_id"] = scopus_id
+                st.success(f"Scopus ID du chercheur : {scopus_id}")
+                check_list.append(scopus_id)
+            else:
+                pass
 
         with st.expander("Récupérer les données WoS :", expanded=False):
             # Téléversement des fichiers Web Of Science
             uploaded_files = st.file_uploader(
-                f"Téléverser les fichiers Web Of Science{'/Scopus' if os.getenv('SCOPUS_API_KEY') == 'YOUR_SCOPUS_API_KEY' else ''}", 
+                f"Téléverser les fichiers Web Of Science{'/Scopus' if os.getenv('SCOPUS_API_KEY') != 'YOUR_SCOPUS_API_KEY' else ''}", 
                 accept_multiple_files=True,
                 type=["xlsx", "xls", "csv"]
             )
@@ -111,6 +123,7 @@ else:
                     # Ajouter à la liste des bases de données
                     if db_name not in list(databases.keys()):
                         databases[f"Publication {db_name}"] = df
+                        st.success(f"Base de données {db_name} ajoutée avec succès.")
     
     else: # API Key not Available
         with st.expander("Récupérer les données WoS/Scopus :", expanded=False):
@@ -154,7 +167,7 @@ else:
                 progress_bar = empty.progress(bar_perc, text="Recherche des données orcid en cours...")
                 
                 # Récupération des données ORCID
-                if st.session_state.show_orcid_fields:
+                if st.session_state.orcid_researcher:
                     orcid_df = Orcid_Researcher(orcid_link=orcid_researcher).format_df_orcids()
                 else:
                     pass
@@ -163,7 +176,7 @@ else:
                 progress_bar.progress(bar_perc / 3, text="Recherche des données HAL en cours...") 
                 
                 # Récupération des données HAL
-                if st.session_state.show_hal_fields:
+                if st.session_state.id_hal:
                     if st.session_state.search_by == "Nom et prénom":
                         hal_df = get_hal_researcher_data(researcher_last_name, researcher_first_name)
                     elif st.session_state.search_by == "ID HAL":
@@ -175,7 +188,7 @@ else:
                 progress_bar.progress(bar_perc/ 3, text="Recherche des données Scopus en cours...") 
                 
                 # Récupération des données Scopus
-                if st.session_state["show_scopus_fields"]:
+                if st.session_state["scopus_id"]:
                     if len(scopus_id) == 0:
                         st.error("Veuillez renseigner un Scopus ID.")
                     elif len(scopus_id) >= 10:
@@ -189,11 +202,11 @@ else:
                 progress_bar.progress(bar_perc / 3,text="Recherche des données en cours...") 
             
             # Ajout des données dans la base de données
-            if st.session_state.show_hal_fields:
+            if st.session_state.id_hal:
                 databases["Publication HAL"] = hal_df
-            if st.session_state.show_scopus_fields:
-                databases["Publication Scopus"] = scopus_df if "Publication Scopus" not in list(databases.keys()) else databases["Publication Scopus"]
-            if st.session_state.show_orcid_fields:
+            if st.session_state.scopus_id:
+                databases["Publication Scopus"] = scopus_df # if "Publication Scopus" not in list(databases.keys()) else databases["Publication Scopus"]
+            if st.session_state.orcid_researcher:
                 databases["Publication Orcid"] = orcid_df
             st.success("Données chargées avec succès.")
         empty.empty()

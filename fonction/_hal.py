@@ -1,7 +1,6 @@
 import requests
 
 import pandas as pd
-import streamlit as st
 
 def base_link(prefix: str = None, query:str = None) -> dict:
     """
@@ -19,7 +18,7 @@ def base_link(prefix: str = None, query:str = None) -> dict:
     return requests.get(root+endpoint).json()
 
 def req_id_hal(idhal:str) -> list:
-    root = f"https://api.archives-ouvertes.fr/ref/author"
+    root = "https://api.archives-ouvertes.fr/ref/author"
     endpoint = f"?q=idHal_s:{idhal}&wt=json"
     req = requests.get(root+endpoint).json()
 

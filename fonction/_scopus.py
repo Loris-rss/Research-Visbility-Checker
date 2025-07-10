@@ -82,8 +82,8 @@ class Scopus_Researcher:
     def error_message(self):
         try:
             int_scopus_id = int(self.scopus_id)
-        except ValueError as err:
-            st.write(f"Pour Scopus :")
+        except ValueError:
+            st.write("Pour Scopus :")
             return st.error("Veuillez renseigner un Scopus ID sans lettre.")
 
         if self.scopus_id == "":
@@ -125,6 +125,7 @@ class Scopus_Researcher:
                 """
                 words = x.split(" ")
                 return words[-1] if words[-1].isdigit() else x.split(" ")[0]
+            
             df["Date"] = df["Date"].apply(extract_last_or_full)
 
             return df

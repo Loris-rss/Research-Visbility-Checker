@@ -29,8 +29,7 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
             st.write(f"Contenu : {df}")
             st.info("💡 Retournez à l'étape d'importation des données pour corriger le problème.")
             continue
-        # Supprimer la colonne "Unnamed: 0" si elle existe
-        st.write(f"📊 Colonnes disponibles : {list(df.columns)}")   
+
         if "Unnamed: 0" in df.columns:
             df = df.drop(columns=["Unnamed: 0"])     
         # Afficher le nombre d'articles de recherche trouvés
