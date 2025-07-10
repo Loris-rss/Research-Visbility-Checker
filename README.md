@@ -159,5 +159,8 @@ Research-Visbility-Checker-V2/
 
 Ce projet est sous licence ???.
 ---
+Avec Docker :
+Si on a modifié le code, il faut forcer forcer la compilation : 
+sudo docker compose up --force-recreate --build
 
 **Développé pour optimiser la visibilité académique des chercheurs** 🎓 
