@@ -8,57 +8,79 @@
 
 L'application vise à identifier rapidement les recoupements entre différentes bases de données scientifiques et à s'assurer que toutes les publications d'un chercheur sont correctement référencées partout. Cela permet de :
 
-- **Détecter les publications manquantes** dans certaines bases de données (Web Of Science)
-- **Identifier les doublons** et incohérences
-- **Optimiser la visibilité** académique du chercheur
-- **Générer des rapports** détaillés de comparaison
+   - **Détecter les publications manquantes** dans certaines bases de données (Web Of Science)
+   - **Identifier les doublons** et incohérences
+   - **Optimiser la visibilité** académique du chercheur
+   - **Générer des rapports** détaillés de comparaison
 
 ## Bases de données supportées
 
 L'application intègre les principales bases de données scientifiques :
 
-- **HAL** (Hyper Articles en Ligne) - Archive ouverte française
-- **ORCID** - Identifiant unique pour les chercheurs
-- **Scopus** - Base de données bibliographique d'Elsevier
-- **Web of Science** - Base de données bibliographique de Clarivate
+   - **HAL** (Hyper Articles en Ligne) - Archive ouverte française
+   - **ORCID** - Identifiant unique pour les chercheurs
+   - **Scopus** - Base de données bibliographique d'Elsevier
+   - **Web of Science** - Base de données bibliographique de Clarivate
 
 ## Fonctionnalités principales
 
 ### 1. Récupération automatique des données
-- **HAL** : Récupération automatique via l'API HAL
-- **ORCID** : Récupération via l'API ORCID publique
-- **Scopus** : Récupération via l'API Scopus (nécessite un identifiant Scopus)
-- **Web of Science** : Import manuel de fichiers Excel exportés
+   
+   - **HAL** : Récupération automatique via l'API HAL
+   - **ORCID** : Récupération via l'API ORCID publique
+   - **Scopus** : Récupération via l'API Scopus (nécessite un identifiant Scopus)
+   - **Web of Science** : Import manuel de fichiers Excel exportés
 
 ### 2. Analyse et comparaison
-- **Recoupement automatique** entre les bases de données
-- **Détection des publications manquantes**
-- **Identification des doublons** et incohérences
-- **Calcul des taux de recoupement**
+   
+   - **Recoupement automatique** entre les bases de données
+   - **Détection des publications manquantes**
+   - **Identification des doublons** et incohérences
+   - **Calcul des taux de recoupement**
 
 ### 3. Visualisation et export
-- **Graphiques interactifs** pour visualiser les recoupements
-- **Tableaux de comparaison** détaillés
-- **Export Excel** des résultats d'analyse
-- **Rapports personnalisés** par chercheur
+   
+   - **Graphiques interactifs** pour visualiser les recoupements
+   - **Tableaux de comparaison** détaillés
+   - **Export Excel** des résultats d'analyse
+   - **Rapports personnalisés** par chercheur
 
 ## 🛠️ Installation et utilisation
 
 ### Prérequis
-- Python 3.8 ou supérieur
-- pip (gestionnaire de paquets Python)
 
-### Installation locale
+   - Python 3.8 ou supérieur
+   - pip (gestionnaire de paquets Python)
 
-1. **Cloner le repository**
+Ou :
+
+   - Docker
+
+### Installation
+
+Cloner le repository
+
 ```bash
 git clone https://github.com/votre-username/Research-Visbility-Checker-V2.git
 cd Research-Visbility-Checker-V2
 ```
 
-2. **Lancer l'application**
+#### Lancer l'application en locale  
+
 ```bash
 streamlit run main.py
+```
+
+#### Lancer l'application avec Docker
+
+```bash
+sudo docker compose up
+```
+
+Si vous avez modifié le code, il faut forcer forcer la compilation :  
+
+```bash
+sudo docker compose up --force-recreate --build
 ```
 
 L'application sera accessible à l'adresse : `http://localhost:8501`
@@ -159,9 +181,6 @@ Research-Visbility-Checker-V2/
 
 Ce projet est sous licence MIT.
 ---
-Avec Docker :
-Si on a modifié le code, il faut forcer forcer la compilation : 
-sudo docker compose up --force-recreate --build
 
 **Développé pour optimiser la visibilité académique des chercheurs** 🎓 
 
