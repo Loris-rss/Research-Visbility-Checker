@@ -66,12 +66,12 @@ class Orcid_Researcher:
                     id_type_list.append(external_ids[id]["external-id-type"])
                     doi_orcid_list.append(external_ids[id]["external-id-value"])
             return pd.DataFrame(data={
-                "Title": title_list,
-                "Journal title": journal_title_list,
-                "orcid path": path_list,
+                "Titre Article": title_list,
+                "Titre Journal": journal_title_list,
+                "Orcid path": path_list,
                 "type": id_type_list,
                 "value": doi_orcid_list,
-                "year": year_list
+                "Date de publication": year_list
             }).sort_values("type").reset_index(drop=True)
 
         else:   

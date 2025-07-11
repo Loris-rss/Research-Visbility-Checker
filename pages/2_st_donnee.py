@@ -123,7 +123,7 @@ else:
                     
                     # Ajouter à la liste des bases de données
                     if db_name not in list(databases.keys()):
-                        databases[f"Publication {db_name}"] = df
+                        databases[db_name] = df
                         st.success(f"Base de données {db_name} ajoutée avec succès.")
     
     else: # API Key not Available
@@ -151,7 +151,7 @@ else:
                     
                     # Ajouter à la liste des bases de données
                     if db_name not in list(databases.keys()):
-                        databases[f"Publication {db_name}"] = df
+                        databases[db_name] = df
 
             # st.session_state.show_hal_fields = not st.session_state.show_hal_fields
 
@@ -203,14 +203,14 @@ else:
             
             # Ajout des données dans la base de données
             if st.session_state.id_hal:
-                databases["Publication HAL"] = hal_df
+                databases["HAL"] = hal_df
             if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY":
                 if st.session_state.scopus_id:
-                    databases["Publication Scopus"] = scopus_df # if "Publication Scopus" not in list(databases.keys()) else databases["Publication Scopus"]
+                    databases["Scopus"] = scopus_df # if "Publication Scopus" not in list(databases.keys()) else databases["Publication Scopus"]
                 else:
                     pass
             if st.session_state.orcid_researcher:
-                databases["Publication Orcid"] = orcid_df
+                databases["Orcid"] = orcid_df
             st.success("Données chargées avec succès.")
         empty.empty()
 

@@ -382,33 +382,12 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
         message.success("Comparaison terminée avec succès!")
         message.empty()
         
-        # ---- 6. Affichage des résultats ----  
-        
-        st.subheader("Résultats")
-        
-        show1, show2 = st.columns(2)
-        
-        with show1:
-            st.metric("Publications dans " + source_name, total_source)
-            # st.metric("Dont publications trouvées dans " + target_name, found_in_target)
-        
-        with show2:
-            st.metric("Publications dans " + target_name, len(target))
-            # st.metric("Dont publications trouvées dans " + source_name, found_in_source)    
-        
-        result1, tx_recoup = st.columns(2)
-        with result1:
-            st.metric("Dont publications trouvées dans " + target_name, found_in_target)
-
-        with tx_recoup:
-            st.metric("Taux de recoupement", f"{percentage:.2f}%", help=f"Taux de recoupement entre les publications de {target_name} et de {target_name}")
-
         def create_venn_diagram(source_name, target_name, source_ids, target_ids):
             """
             Crée un diagramme de Venn pour visualiser les recoupements.
             """
             st.divider()
-            venn_graph, resultats = st.columns(2)
+            
             # Nettoyer les ensembles des valeurs NaN
             set1 = {str(id_val) for id_val in source_ids if pd.notna(id_val) and str(id_val).strip() != ''}
             set2 = {str(id_val) for id_val in target_ids if pd.notna(id_val) and str(id_val).strip() != ''}
@@ -420,7 +399,6 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
             }
         
             fig, ax = plt.subplots(figsize=(8, 6))
-            
 
             # Créer le diagramme de Venn avec formatage
             venn(dataset_dict, 
@@ -431,6 +409,7 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
                 
             plt.title(f"Recoupements entre {source_name} et {target_name}", 
                         fontsize=12, fontweight='bold')
+            
             plt.tight_layout()
             
             # Sauvegarder dans session_state
@@ -439,32 +418,51 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
             else:
                 st.session_state["plot_venn_diagram"][f"{source_name}-{target_name}"] = fig
             
-            with venn_graph:    
-                # Afficher le diagramme
-                st.pyplot(fig)
+            st.subheader("Statistiques détaillées")
+            publication1, publication2 = st.columns(2)
+            with publication1:
+                st.metric(label=f"📚 Publications dans {source_name} :", value=len(set1))
+            with publication2:
+                st.metric(label=f"📚 Publications dans {target_name} :", value=len(set2))
             
+            st.divider()
+
             # Afficher les statistiques détaillées
             intersection = len(set1 & set2)
             only_source = len(set1 - set2)
             only_target = len(set2 - set1)
-            total_unique = len(set1 | set2)
+            # Calculer le total unique basé sur les vraies données
+            total_unique_real = (total_source - found_in_target) + len(target_only) + found_in_target
+            total_unique = total_unique_real
             
-            with resultats:
+            details, plot = st.columns(2)
+
+            with details:
                 st.markdown(f"""
-                **📊 Statistiques détaillées :**
-                - 📚 Publications uniquement dans {source_name} : **{only_source}**
-                - 📚 Publications uniquement dans {target_name} : **{only_target}**
-                - 🔗 Publications communes : **{intersection}**
-                - 📖 Total de publications uniques : **{total_unique}**
-                - 🎯 Taux de recouvrement : **{(intersection/total_unique)*100:.1f}%**
-                """)
+            **📊 Statistiques détaillées :**
+            - 📚 Publications uniquement dans {source_name} : **{only_source}**
+            - 📚 Publications uniquement dans {target_name} : **{only_target}**
+            - 🔗 Publications communes : **{intersection}**
+            - 📖 Total de publications uniques : **{total_unique}**
+            - 🎯 Taux de recouvrement : **{(intersection/total_unique)*100:.1f}%**
+            """)
+
+            # Afficher le diagramme
+            with plot:
+                st.pyplot(fig, use_container_width=True)
 
         # Extraire tous les identifiants uniques de chaque DataFrame
         source_ids = set()
         target_ids = set()
-
-        source_for_venn = set(f"source_{i}" for i in range(total_source))
-        target_for_venn = set(f"target_{i}" for i in range(len(target))) 
+        
+        # Calculer les publications uniquement dans la cible
+        # Créer un ensemble des identifiants de la source pour comparaison rapide
+        source_id_set = set()
+        for ids in source['all_ids'].dropna():
+            if isinstance(ids, list) and ids:
+                source_id_set.update(ids)
+        
+        target_only = target[~target['all_ids'].apply(lambda x: any(id_str in source_id_set for id_str in (x if isinstance(x, list) else [])))]
         
         intersection_for_venn = set(f"common_{i}" for i in range(found_in_target))
         
@@ -485,30 +483,104 @@ def compare_publication_databases(source_df, target_df, source_name="Source", ta
         only_in_target = len(target) - found_in_target
         for i in range(only_in_target):
             target_final.add(f"only_target_{i}")
-
         create_venn_diagram(source_name, target_name, source_final, target_final)
-        
-        st.divider()
+
 
         # ---- 7. Affichage des tableaux ---- 
-        st.subheader("Détail des résultats")
-        tabs = st.tabs(["Tous les articles", f"Communs ({found_in_target})", f"Non trouvés ({total_source - found_in_target})"])
+        # Calculer le total unique
+        total_unique = (total_source - found_in_target) + len(target_only) + found_in_target
         
+        tabs = st.tabs([
+            f"Uniquement {source_name} ({total_source - found_in_target})", 
+            f"Uniquement {target_name} ({len(target_only)})", 
+            f"Communes ({found_in_target})", 
+            f"Publications uniques ({total_unique})"
+        ])
+        
+        only_source_pubs = source[~source[in_target_col]].reset_index(drop=True)
+        
+        # Onglet 1: Publications uniquement dans la source
         with tabs[0]:
-            display_cols = [col for col in source.columns if col not in ["all_ids", status_col, in_target_col, matching_id_col, "Unnamed: 0"]]
-            st.dataframe(source[display_cols], height=400)
+            if len(only_source_pubs) > 0:
+                display_cols = [col for col in only_source_pubs.columns if col not in ["all_ids", status_col, in_target_col, matching_id_col, "Unnamed: 0"]]
+                st.dataframe(only_source_pubs[display_cols], height=400, use_container_width=True)
+            else:
+                st.info(f"Toutes les publications de {source_name} sont présentes dans {target_name}.")
         
+        # Onglet 2: Publications uniquement dans la cible
         with tabs[1]:
-            common_pubs = source[source[in_target_col]].reset_index(drop=True)
+            if len(target_only) > 0:
+                display_cols = [col for col in target_only.columns if col not in ["all_ids", "Unnamed: 0"]]
+                st.dataframe(target_only[display_cols], height=400, use_container_width=True)
+            else:
+                st.info(f"Toutes les publications de {target_name} sont présentes dans {source_name}.")
+        
+        common_pubs = source[source[in_target_col]].reset_index(drop=True)
+
+        # Onglet 3: Publications communes
+        with tabs[2]:
             if len(common_pubs) > 0:
                 display_cols = [col for col in common_pubs.columns if col not in ["all_ids", status_col, in_target_col, matching_id_col, "Unnamed: 0"]]
-                st.dataframe(common_pubs[display_cols], height=400)
+                st.dataframe(common_pubs[display_cols], height=400, use_container_width=True)
+            else:
+                st.info("Aucune publication commune trouvée.")
         
-        with tabs[2]:
-            missing_pubs = source[~source[in_target_col]].reset_index(drop=True)
-            if len(missing_pubs) > 0:
-                display_cols = [col for col in missing_pubs.columns if col not in ["all_ids", status_col, in_target_col, matching_id_col, "Unnamed: 0"]]
-                st.dataframe(missing_pubs[display_cols], height=400)
+        # Onglet 4: Publications uniques (total)
+        with tabs[3]:
+            try:
+                # Créer un DataFrame unique en utilisant seulement les colonnes principales
+                main_cols = []
+                for df in [only_source_pubs, target_only, common_pubs]:
+                    if not df.empty:
+                        # Identifier les colonnes principales (titre, auteurs, année, etc.)
+                        potential_main_cols = [col for col in df.columns if any(keyword in col.lower() for keyword in ['title', 'titre', 'author', 'auteur', 'year', 'année', 'doi', 'journal'])]
+                        if potential_main_cols:
+                            main_cols.extend(potential_main_cols)
+                
+                # Garder seulement les colonnes principales uniques
+                main_cols = list(set(main_cols))
+                
+                if main_cols:
+                    # Préparer les DataFrames avec seulement les colonnes principales
+                    dfs_to_concat = []
+                    for df in [only_source_pubs, target_only, common_pubs]:
+                        if not df.empty:
+                            available_cols = [col for col in main_cols if col in df.columns]
+                            if available_cols:
+                                dfs_to_concat.append(df[available_cols])
+                    
+                    if dfs_to_concat:
+                        all_unique_pubs = pd.concat(dfs_to_concat, ignore_index=True)
+                        # Supprimer les doublons basés sur les colonnes principales
+                        all_unique_pubs = all_unique_pubs.drop_duplicates()
+                        
+                        if len(all_unique_pubs) > 0:
+                            st.dataframe(all_unique_pubs, height=400, use_container_width=True)
+                        else:
+                            st.info("Aucune publication unique trouvée.")
+                    else:
+                        st.info("Aucune colonne principale trouvée pour la comparaison.")
+                else:
+                    st.info("Aucune colonne principale identifiée pour créer l'ensemble unique.")
+                    
+            except Exception as e:
+                st.error(f"Erreur lors de l'affichage des publications uniques : {str(e)}")
+                st.info("Affichage des données séparément...")
+                # Affichage de secours sans concaténation
+                st.subheader("Publications uniquement dans la source")
+                if len(only_source_pubs) > 0:
+                    display_cols = [col for col in only_source_pubs.columns if col not in ["all_ids", status_col, in_target_col, matching_id_col, "Unnamed: 0"]]
+                    st.dataframe(only_source_pubs[display_cols], height=200, use_container_width=True)
+                
+                st.subheader("Publications uniquement dans la cible")
+                if len(target_only) > 0:
+                    display_cols = [col for col in target_only.columns if col not in ["all_ids", "Unnamed: 0"]]
+                    st.dataframe(target_only[display_cols], height=200, use_container_width=True)
+                
+                st.subheader("Publications communes")
+                if len(common_pubs) > 0:
+                    display_cols = [col for col in common_pubs.columns if col not in ["all_ids", status_col, in_target_col, matching_id_col, "Unnamed: 0"]]
+                    st.dataframe(common_pubs[display_cols], height=200, use_container_width=True)
 
         return source
 
@@ -516,6 +588,7 @@ def compare_all_databases(databases) -> dict:
 
     """
     Compare toutes les combinaisons possibles de bases de données fournies.
+    Évite les comparaisons redondantes en ne faisant que les combinaisons uniques.
     
     Args:
         databases(dict) : dictionnaire avec les bases de données
@@ -539,61 +612,77 @@ def compare_all_databases(databases) -> dict:
     # Création d'une barre de progression
     progress_bar = st.progress(0)
     
-    # Calculer le nombre total de comparaisons
+    # Calculer le nombre total de comparaisons uniques (combinaisons sans répétition)
     n_databases = len(databases)
-    total_comparisons = n_databases * (n_databases - 1)  # Nombre de permutations n*(n-1)
+    total_comparisons = (n_databases * (n_databases - 1)) // 2  # Combinaisons C(n,2)
     
     # Compteur pour la progression
     comp_counter = 0
-            
-    source_names = list(databases.keys())
-    # Créer un onglet par base de données
-    tabs = st.tabs(source_names)
+    
+    # Créer les paires uniques de comparaisons
+    database_names = list(databases.keys())
+    comparison_pairs = []
+    
+    for i in range(len(database_names)):
+        for j in range(i + 1, len(database_names)):
+            comparison_pairs.append((database_names[i], database_names[j]))
+    
+    # Créer un expander pour chaque comparaison unique
+    if comparison_pairs:
+        for (source_name, target_name) in comparison_pairs:
+            with st.expander(f"{source_name} et {target_name}", expanded=True):
+                st.header(f"Comparaison entre {source_name} et {target_name}")
+                st.divider()
+                comp_counter += 1
+                progress_bar.progress(comp_counter / total_comparisons)
+                
+                key = f"{source_name}_{target_name}"
+                
+                try:
+                    # Comparaison dans les deux sens
+                    results[key] = compare_publication_databases(
+                        databases[source_name],
+                        databases[target_name],
+                        source_name=source_name, 
+                        target_name=target_name,
+                    )
+                    
+                    # Création des statistiques pour le récapitulatif
+                    if not results[key].empty:
+                        in_target_col = f"in_{target_name.lower()}"
+                        total1 = len(results[key])
+                        found = results[key][in_target_col].sum()
+                        # On ajoute le total de la base 2 pour le calcul correct du taux de recouvrement
+                        total2 = len(databases[target_name])
+                        recap.append({
+                            'Base 1': source_name,
+                            'Base 2': target_name,
+                            'Total articles base 1': total1,
+                            'Total articles base 2': total2,
+                            'Publications communes': found
+                        })
+                except Exception as e:
+                    st.error(f"Erreur lors de la comparaison entre {source_name} et {target_name}: {str(e)}")
+                
+                st.markdown("---")
 
-    for i, (source_name, tab) in enumerate(zip(source_names, tabs)):
-            with tab:
-                st.header(f"Comparaisons avec {source_name} comme source")
-                # Comparer avec toutes les autres bases de données
-                for target_name in source_names:
-                    if target_name != source_name:  # Éviter de comparer une base avec elle-même
-                        comp_counter += 1
-                        progress_bar.progress(comp_counter / total_comparisons)
-                        
-                        st.markdown(f"### Comparaison {source_name} → {target_name}")
-                        key = f"{source_name}_{target_name}"
-                        
-                        try:
-                            results[key] = compare_publication_databases(
-                                databases[source_name],
-                                databases[target_name],
-                                source_name=source_name, 
-                                target_name=target_name,
-                            )
-                            
-                            # Création des statistiques pour le récapitulatif
-                            if not results[key].empty:
-                                in_target_col = f"in_{target_name.lower()}"
-                                total = len(results[key])
-                                found = results[key][in_target_col].sum()
-                                percentage = (found / total) * 100 if total > 0 else 0
-                                
-                                recap.append({
-                                    'Source': source_name,
-                                    'Cible': target_name,
-                                    'Total articles source': total,
-                                    'Articles trouvés dans cible': found,
-                                    'Taux de recoupement': f"{percentage:.2f}%"
-                                })
-                        except Exception as e:
-                            st.error(f"Erreur lors de la comparaison entre {source_name} et {target_name}: {str(e)}")
-                        
-                        st.markdown("---")
-        
-    # Créer un tableau récapitulatif des taux de recoupement
+    # Créer un tableau récapitulatif des taux de recouvrement
     if recap:
-        st.subheader("Récapitulatif des taux de recoupement")
+        st.subheader("Récapitulatif des taux de recouvrement")
         recap_df = pd.DataFrame(recap)
-        st.dataframe(recap_df)
+        if not recap_df.empty:
+            # Calcul du taux de recouvrement
+            taux_couv = []
+            for i, row in recap_df.iterrows():
+                total_unique = row['Total articles base 1'] + row['Total articles base 2'] - row['Publications communes']
+                taux = (row['Publications communes'] / total_unique) * 100 if total_unique > 0 else 0
+                taux_couv.append(f"{taux:.2f}%")
+            recap_df['Taux de recouvrement'] = taux_couv
+            st.dataframe(recap_df[[
+                'Base 1', 'Base 2', 'Total articles base 1', 'Total articles base 2', 'Publications communes', 'Taux de recouvrement'
+            ]])
+        else:
+            st.info("Aucune donnée à afficher.")
     else:
         st.warning("Aucune comparaison n'a pu être effectuée avec succès.")
     

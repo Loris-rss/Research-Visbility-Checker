@@ -105,11 +105,11 @@ class Scopus_Researcher:
             data_list = []
             for articles in scopus_articles:
                 data_list.append({
-                    "Nom Publication": articles["prism:publicationName"],
-                    "Date": articles["prism:coverDisplayDate"],
+                    "Titre Publication": articles["prism:publicationName"],
+                    "Date de publication": articles["prism:coverDisplayDate"],
                     "pubmed-id": articles.get("pubmed-id", None),
                     "scopus_id": articles["dc:identifier"],
-                    "doi": articles.get("prism:doi", "")
+                    "DOI": articles.get("prism:doi", "")
                 })
             df = pd.DataFrame(data=data_list)
             
@@ -126,7 +126,7 @@ class Scopus_Researcher:
                 words = x.split(" ")
                 return words[-1] if words[-1].isdigit() else x.split(" ")[0]
             
-            df["Date"] = df["Date"].apply(extract_last_or_full)
+            df["Date de publication"] = df["Date de publication"].apply(extract_last_or_full)
 
             return df
         else:
