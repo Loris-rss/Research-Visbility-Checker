@@ -157,7 +157,7 @@ Research-Visbility-Checker-V2/
 
 ## 📝 Licence
 
-Ce projet est sous licence ???.
+Ce projet est sous licence MIT.
 ---
 Avec Docker :
 Si on a modifié le code, il faut forcer forcer la compilation : 
