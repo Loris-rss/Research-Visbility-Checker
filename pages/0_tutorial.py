@@ -1,43 +1,5 @@
 import streamlit as st
 
-from fonction import compare_publication_databases
-
-from matplotlib_venn import venn2
-import matplotlib.pyplot as plt
-
-import pandas as pd
-from venn import venn, pseudovenn
-
-orcid = pd.read_excel("ressources\orcid_publication.xlsx")
-hal = pd.read_excel("ressources\hal_humbert.xlsx")
-
-orcid_doi = orcid["DOI"]
-hal_doi = hal["DOI"]
-
-orcid_set = set(orcid_doi.dropna().astype(str))
-hal_set = set(hal_doi.dropna().astype(str))
-
-dataset_dict_correct = {
-    'ORCID': orcid_set,
-    'HAL': hal_set
-}
-
-# Créer le diagramme avec matplotlib_venn
-plt.figure(figsize=(10, 8))
-v = venn2([orcid_set, hal_set], ('ORCID', 'HAL'))
-
-# Personnaliser les labels pour afficher les totaux
-for text in v.set_labels:
-    if text:
-        text.set_fontsize(14)
-        
-for text in v.subset_labels:
-    if text:
-        text.set_fontsize(12)
-
-plt.title("Comparaison des publications ORCID vs HAL", fontsize=16)
-st.pyplot(plt)
-
 st.header("Tutoriel d'utililisation")
 
 st.subheader("Web Of Science")

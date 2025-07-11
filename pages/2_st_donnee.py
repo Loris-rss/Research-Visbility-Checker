@@ -45,17 +45,18 @@ else:
         search_by = st.radio(label = "Recherche HAL par : ", options=["Nom et prénom", "ID HAL"])
         
         st.session_state["search_by"] = search_by
-        st.write(st.session_state["search_by"])
 
-        if st.session_state["search_by"] == "Nom et prénom":
+        if search_by == "Nom et prénom":
             last_name_col, first_name_col = st.columns(2)
             with first_name_col:
                 researcher_first_name = st.text_input("Prénom du chercheur :")
+                
                 if researcher_first_name:
                     st.session_state["researcher_first_name"] = researcher_first_name
                     st.success(f"Prénom du chercheur : {researcher_first_name}")
                 else:
                     pass
+            
             with last_name_col:
                 researcher_last_name = st.text_input("Nom du chercheur :")
                 if researcher_last_name:
@@ -152,7 +153,7 @@ else:
                     if db_name not in list(databases.keys()):
                         databases[f"Publication {db_name}"] = df
 
-            st.session_state.show_hal_fields = not st.session_state.show_hal_fields
+            # st.session_state.show_hal_fields = not st.session_state.show_hal_fields
 
     empty = st.empty()
 
@@ -175,37 +176,39 @@ else:
                 bar_perc += 1
                 progress_bar.progress(bar_perc / 3, text="Recherche des données HAL en cours...") 
                 
-                # Récupération des données HAL
-                if st.session_state.id_hal:
-                    if st.session_state.search_by == "Nom et prénom":
-                        hal_df = get_hal_researcher_data(researcher_last_name, researcher_first_name)
-                    elif st.session_state.search_by == "ID HAL":
-                        hal_df = get_hal_researcher_data(idhal=id_hal)
+
+                if st.session_state["id_hal"]:
+                    hal_df = get_hal_researcher_data(idhal=id_hal)
                 else:
-                    pass
-                
+                    hal_df = get_hal_researcher_data(researcher_last_name, researcher_first_name, id_hal)
+
+
                 bar_perc += 1
                 progress_bar.progress(bar_perc/ 3, text="Recherche des données Scopus en cours...") 
                 
                 # Récupération des données Scopus
-                if st.session_state["scopus_id"]:
-                    if len(scopus_id) == 0:
-                        st.error("Veuillez renseigner un Scopus ID.")
-                    elif len(scopus_id) >= 10:
-                        scopus_df = Scopus_Researcher(scopus_id=scopus_id).get_publication_scopus()
+                if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY":
+                    if st.session_state["scopus_id"]:
+                        if len(scopus_id) == 0:
+                            st.error("Veuillez renseigner un Scopus ID.")
+                        elif len(scopus_id) >= 10:
+                            scopus_df = Scopus_Researcher(scopus_id=scopus_id).get_publication_scopus()
+                        else:
+                            st.error("Le Scopus ID doit contenir au moins 10 chiffres.")
                     else:
-                        st.error("Le Scopus ID doit contenir au moins 10 chiffres.")
-                else:
-                    # st.write("pas de données scopus")
-                    pass
+                        # st.write("pas de données scopus")
+                        pass
                 bar_perc += 1
                 progress_bar.progress(bar_perc / 3,text="Recherche des données en cours...") 
             
             # Ajout des données dans la base de données
             if st.session_state.id_hal:
                 databases["Publication HAL"] = hal_df
-            if st.session_state.scopus_id:
-                databases["Publication Scopus"] = scopus_df # if "Publication Scopus" not in list(databases.keys()) else databases["Publication Scopus"]
+            if os.getenv("SCOPUS_API_KEY") != "YOUR_SCOPUS_API_KEY":
+                if st.session_state.scopus_id:
+                    databases["Publication Scopus"] = scopus_df # if "Publication Scopus" not in list(databases.keys()) else databases["Publication Scopus"]
+                else:
+                    pass
             if st.session_state.orcid_researcher:
                 databases["Publication Orcid"] = orcid_df
             st.success("Données chargées avec succès.")

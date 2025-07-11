@@ -74,7 +74,7 @@ def get_hal_researcher_data(lastName:str = None, firstName:str = None, idhal:str
     # authIdForm_i:158428 -> Marc Humbert -> 449
     if lastName and firstName:
         ids = id_author(lastName = lastName, firstName=firstName)
-    elif idhal:
+    if idhal:
         ids = req_id_hal(idhal=idhal)
     else:
         return "Erreur Recherche HAL : Veuillez renseigner le nom et le prénom ou l'ID HAL."
@@ -93,11 +93,11 @@ def get_hal_researcher_data(lastName:str = None, firstName:str = None, idhal:str
                 pubmedId_id = doc.get("pubmedId_id", None)
                 authLastNameFirstName_s = doc.get("authLastNameFirstName_s", None)
                 data_hal.append({
-                    "Titre_journal": journalTitle_s,
-                    "Author Full Names" : authLastNameFirstName_s,
-                    "Title_article": title_s,
-                    "journalPublisher_s" : journalPublisher_s,
-                    "publicationDate_s" : publicationDate_s,
+                    "Titre Journal": journalTitle_s,
+                    "Auteur" : authLastNameFirstName_s,
+                    "Titre Article": title_s,
+                    "Journal Publisher" : journalPublisher_s,
+                    "Date de publication" : publicationDate_s,
                     "DOI": doiId_s,
                     "pubmedId": pubmedId_id
                 })

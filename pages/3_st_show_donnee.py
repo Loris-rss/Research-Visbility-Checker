@@ -42,7 +42,7 @@ for tab, (db_name, df) in zip(tabs, st.session_state["databases"].items()):
         st.dataframe(df)
 
         # Définir les colonnes de date
-        date_list_col = ["Year","year", "Date", "publicationDate_s", "Publication Year"]
+        date_list_col = ["Year","year", "Date", "publicationDate_s", "Publication Year", "Date de publication"]
 
         # Définir la bonne colonne de date pour chaque dataframe
         right_col = "".join([col for col in df.columns if col in date_list_col])
